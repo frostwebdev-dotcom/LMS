@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
   ) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, roles(name)")
+      .select("role_id, roles(name)")
       .eq("id", user.id)
       .maybeSingle();
     role = roleFromSource(

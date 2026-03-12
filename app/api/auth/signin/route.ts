@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   if (data.user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, role_id, roles(name)")
+      .select("role_id, roles(name)")
       .eq("id", data.user.id)
       .single();
     role = roleFromSource(
