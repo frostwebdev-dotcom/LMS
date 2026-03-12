@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useActionState } from "react";
 import { signUp } from "@/app/actions/auth";
+import { Toast } from "@/components/ui/Toast";
 
 type Mode = "signin" | "signup";
+
+const SIGNUP_SUCCESS_MESSAGE =
+  "Account created. Check your email for a confirmation link, then sign in.";
 
 interface AuthFormProps {
   mode: Mode;
@@ -17,13 +21,18 @@ interface AuthFormProps {
 export function AuthForm({ mode, redirectTo, error: urlError }: AuthFormProps) {
   const [signInError, setSignInError] = useState<string | null>(null);
   const [signInPending, setSignInPending] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const dismissToast = useCallback(() => setToastVisible(false), []);
 
   const [state, formAction, isPending] = useActionState(
     async (_: unknown, formData: FormData) => {
       if (mode !== "signup") return null;
       const result = await signUp(formData);
       if (result.success && result.redirectTo) {
-        window.location.href = result.redirectTo;
+        setToastVisible(true);
+        setTimeout(() => {
+          window.location.href = result.redirectTo;
+        }, 2500);
         return null;
       }
       return result.success ? null : result.error;
@@ -129,6 +138,16 @@ export function AuthForm({ mode, redirectTo, error: urlError }: AuthFormProps) {
       >
         {pending ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
       </button>
+
+      {mode === "signup" && (
+        <Toast
+          message={SIGNUP_SUCCESS_MESSAGE}
+          visible={toastVisible}
+          onDismiss={dismissToast}
+          duration={5000}
+          type="success"
+        />
+      )}
     </form>
   );
 }
