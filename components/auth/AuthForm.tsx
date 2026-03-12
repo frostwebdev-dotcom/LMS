@@ -32,7 +32,7 @@ export function AuthForm({ mode, redirectTo, error: urlError }: AuthFormProps) {
         setToastVisible(true);
         setTimeout(() => {
           window.location.href = result.redirectTo;
-        }, 2500);
+        }, 8000);
         return null;
       }
       return result.success ? null : result.error;
@@ -144,7 +144,7 @@ export function AuthForm({ mode, redirectTo, error: urlError }: AuthFormProps) {
           message={SIGNUP_SUCCESS_MESSAGE}
           visible={toastVisible}
           onDismiss={dismissToast}
-          duration={5000}
+          duration={10000}
           type="success"
         />
       )}

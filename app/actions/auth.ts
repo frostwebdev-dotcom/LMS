@@ -17,9 +17,18 @@ export type AuthActionResult =
 const NETWORK_ERROR_MESSAGE =
   "Cannot reach the server. Check your internet connection and try again.";
 
-function toUserFriendlyError(message: string): string {
+const EMAIL_EXISTS_MESSAGE =
+  "This email is already registered. Please sign in or use a different email.";
+
+function toUserFriendlyError(message: string, code?: string): string {
   if (/fetch failed|timeout|ECONNREFUSED|ENOTFOUND|connect/i.test(message)) {
     return NETWORK_ERROR_MESSAGE;
+  }
+  if (
+    code === "user_already_registered" ||
+    /already registered|already exists|email.*taken/i.test(message)
+  ) {
+    return EMAIL_EXISTS_MESSAGE;
   }
   return message;
 }
@@ -72,6 +81,15 @@ export async function signUp(formData: FormData): Promise<AuthActionResult> {
   }
 
   const supabase = await createClient();
+
+  // Block signup if email already exists in auth.users or profiles (e.g. existing profile from another source).
+  const { data: emailExists } = await supabase.rpc("email_exists_for_signup", {
+    check_email: parsed.data.email,
+  });
+  if (emailExists === true) {
+    return { success: false, error: EMAIL_EXISTS_MESSAGE };
+  }
+
   let error: { message: string } | null = null;
   try {
     const result = await supabase.auth.signUp({
@@ -90,7 +108,11 @@ export async function signUp(formData: FormData): Promise<AuthActionResult> {
     return { success: false, error: toUserFriendlyError(message) };
   }
   if (error) {
-    return { success: false, error: toUserFriendlyError(error.message) };
+    const code = (error as { code?: string }).code;
+    return {
+      success: false,
+      error: toUserFriendlyError(error.message, code),
+    };
   }
 
   return { success: true, redirectTo: STAFF_DEFAULT_PATH };
