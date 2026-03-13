@@ -9,6 +9,8 @@ interface ContentViewerProps {
   contentType: ContentType;
   /** Signed URL for media (video/pdf/presentation). Empty for text or when unavailable. */
   signedUrl: string;
+  /** For presentation type: Office Online embed URL so PPT/PPTX display in-browser. Empty to fall back to signedUrl (may download). */
+  presentationViewerUrl?: string;
   /** Plain text for lesson_type = 'text'. */
   contentText?: string | null;
   contentId: string;
@@ -20,8 +22,10 @@ interface ContentViewerProps {
 export function ContentViewer({
   contentType,
   signedUrl,
+  presentationViewerUrl = "",
   contentText,
   contentId,
+  moduleId,
   prevHref,
   nextHref,
 }: ContentViewerProps) {
@@ -36,6 +40,11 @@ export function ContentViewer({
   const isMedia = contentType === "video" || contentType === "pdf" || contentType === "presentation";
   const hasMedia = isMedia && !!signedUrl;
   const hasText = contentType === "text" && contentText;
+  const iframeSrc =
+    contentType === "presentation" && presentationViewerUrl
+      ? presentationViewerUrl
+      : signedUrl;
+  const hasPresentationViewer = contentType === "presentation" && !!iframeSrc;
 
   return (
     <div className="space-y-4">
@@ -48,13 +57,38 @@ export function ContentViewer({
             onEnded={handleMarkComplete}
           />
         )}
-        {(contentType === "pdf" || contentType === "presentation") && hasMedia && (
+        {contentType === "pdf" && hasMedia && (
           <iframe
             src={signedUrl}
-            title="Content"
+            title="PDF"
             className="w-full aspect-video min-h-[60vh]"
           />
         )}
+        {contentType === "presentation" && (hasPresentationViewer ? (
+          <>
+            <iframe
+              src={iframeSrc}
+              title="Presentation"
+              className="w-full aspect-video min-h-[60vh]"
+            />
+            {hasMedia && (
+              <p className="p-3 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
+                If the presentation doesn’t load above,{" "}
+                <a href={signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 font-medium underline">
+                  open or download it here
+                </a>.
+              </p>
+            )}
+          </>
+        ) : hasMedia ? (
+          <p className="p-4 text-slate-600 text-sm">
+            This presentation cannot be shown in-browser here. You can{" "}
+            <a href={signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">
+              open it in a new tab
+            </a>{" "}
+            (it may download).
+          </p>
+        ) : null)}
         {contentType === "text" && (
           <div className="p-4 sm:p-6 min-h-[200px]">
             {hasText ? (
