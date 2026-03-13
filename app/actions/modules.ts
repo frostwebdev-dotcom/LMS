@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/get-session";
 import { createClient } from "@/lib/supabase/server";
 import { createModuleSchema, updateModuleSchema } from "@/lib/validations/modules";
+import { toUserFriendlyError } from "@/lib/actions/errors";
 
 export type ModuleActionResult =
   | { success: true; id?: string }
@@ -33,7 +34,7 @@ export async function createModuleAction(
     })
     .select("id")
     .single();
-  if (error) return { success: false, error: error.message };
+  if (error) return { success: false, error: toUserFriendlyError(error.message) };
   revalidatePath("/admin");
   revalidatePath("/admin/modules");
   return { success: true, id: data?.id };
@@ -59,7 +60,7 @@ export async function updateModuleAction(
     .from("training_modules")
     .update(parsed.data)
     .eq("id", moduleId);
-  if (error) return { success: false, error: error.message };
+  if (error) return { success: false, error: toUserFriendlyError(error.message) };
   revalidatePath("/admin");
   revalidatePath("/admin/modules");
   revalidatePath(`/admin/modules/${moduleId}`);
@@ -72,7 +73,7 @@ export async function deleteModuleAction(formData: FormData): Promise<ModuleActi
   if (typeof moduleId !== "string") return { success: false, error: "Missing module" };
   const supabase = await createClient();
   const { error } = await supabase.from("training_modules").delete().eq("id", moduleId);
-  if (error) return { success: false, error: error.message };
+  if (error) return { success: false, error: toUserFriendlyError(error.message) };
   revalidatePath("/admin");
   revalidatePath("/admin/modules");
   redirect("/admin/modules");

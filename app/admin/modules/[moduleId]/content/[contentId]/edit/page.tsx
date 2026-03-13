@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getModuleById } from "@/services/module-service";
 import { getContentById } from "@/services/content-service";
 import { ContentEditForm } from "@/components/admin/ContentEditForm";
-import { updateContentAction } from "@/app/actions/content";
 
 export default async function EditContentPage({
   params,
@@ -25,13 +24,12 @@ export default async function EditContentPage({
       >
         ← Back to module
       </Link>
-      <h1 className="text-2xl font-bold text-slate-800">Edit content</h1>
+      <h1 className="text-2xl font-bold text-slate-800">Edit lesson</h1>
       <ContentEditForm
         contentId={contentId}
         moduleId={moduleId}
         initialTitle={content.title}
         initialSortOrder={content.sort_order}
-        action={updateContentAction}
       />
     </div>
   );

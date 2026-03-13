@@ -25,15 +25,17 @@ export interface TrainingModule {
   updated_at: string;
 }
 
-export type ContentType = "video" | "pdf" | "presentation";
+export type ContentType = "video" | "pdf" | "presentation" | "text";
 
 export interface ModuleContent {
   id: string;
   module_id: string;
   title: string;
   content_type: ContentType;
-  /** Storage path or URL for the asset */
-  storage_path: string;
+  /** Storage path for media (video/pdf/presentation). Null/empty for text lessons. */
+  storage_path?: string | null;
+  /** Plain text content for lesson_type = 'text'. */
+  content_text?: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;

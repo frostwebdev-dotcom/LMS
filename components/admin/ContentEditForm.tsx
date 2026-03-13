@@ -2,20 +2,14 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-
-type ActionResult = { success: true } | { success: false; error: string };
+import { updateContentAction } from "@/app/actions/content";
+import type { ContentActionResult } from "@/app/actions/content";
 
 interface ContentEditFormProps {
   contentId: string;
   moduleId: string;
   initialTitle: string;
   initialSortOrder: number;
-  action: (
-    contentId: string,
-    moduleId: string,
-    prev: unknown,
-    formData: FormData
-  ) => Promise<ActionResult>;
 }
 
 export function ContentEditForm({
@@ -23,12 +17,12 @@ export function ContentEditForm({
   moduleId,
   initialTitle,
   initialSortOrder,
-  action,
 }: ContentEditFormProps) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(
-    (_prev: ActionResult | null, fd: FormData) => action(contentId, moduleId, _prev, fd),
-    null as ActionResult | null
+    (_prev: ContentActionResult | null, fd: FormData) =>
+      updateContentAction(contentId, moduleId, _prev, fd),
+    null as ContentActionResult | null
   );
 
   if (state?.success) {

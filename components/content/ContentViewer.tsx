@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
+import { markLessonCompleteAction } from "@/app/actions/lesson-progress";
 import type { ContentType } from "@/types/database";
 
 interface ContentViewerProps {
   contentType: ContentType;
+  /** Signed URL for media (video/pdf/presentation). Empty for text or when unavailable. */
   signedUrl: string;
+  /** Plain text for lesson_type = 'text'. */
+  contentText?: string | null;
   contentId: string;
   moduleId: string;
-  markCompleteAction: () => Promise<void>;
   prevHref: string | null;
   nextHref: string | null;
 }
@@ -17,7 +20,8 @@ interface ContentViewerProps {
 export function ContentViewer({
   contentType,
   signedUrl,
-  markCompleteAction,
+  contentText,
+  contentId,
   prevHref,
   nextHref,
 }: ContentViewerProps) {
@@ -25,14 +29,18 @@ export function ContentViewer({
 
   const handleMarkComplete = () => {
     startTransition(async () => {
-      await markCompleteAction();
+      await markLessonCompleteAction(contentId);
     });
   };
 
+  const isMedia = contentType === "video" || contentType === "pdf" || contentType === "presentation";
+  const hasMedia = isMedia && !!signedUrl;
+  const hasText = contentType === "text" && contentText;
+
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
-        {contentType === "video" && signedUrl && (
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+        {contentType === "video" && hasMedia && (
           <video
             src={signedUrl}
             controls
@@ -40,46 +48,58 @@ export function ContentViewer({
             onEnded={handleMarkComplete}
           />
         )}
-        {(contentType === "pdf" || contentType === "presentation") && signedUrl && (
+        {(contentType === "pdf" || contentType === "presentation") && hasMedia && (
           <iframe
             src={signedUrl}
             title="Content"
             className="w-full aspect-video min-h-[60vh]"
           />
         )}
-        {!signedUrl && (
-          <div className="flex aspect-video items-center justify-center text-slate-500">
-            Unable to load content.
+        {contentType === "text" && (
+          <div className="p-4 sm:p-6 min-h-[200px]">
+            {hasText ? (
+              <div className="prose prose-slate max-w-none text-slate-700 whitespace-pre-wrap">
+                {contentText}
+              </div>
+            ) : (
+              <p className="text-slate-500">No text content.</p>
+            )}
+          </div>
+        )}
+        {isMedia && !hasMedia && (
+          <div className="flex aspect-video items-center justify-center text-slate-500 p-6">
+            Unable to load media. The file may be missing or unavailable.
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between">
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={handleMarkComplete}
           disabled={isPending}
-          className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+          className="order-2 sm:order-1 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition"
         >
           {isPending ? "Saving…" : "Mark as complete"}
         </button>
-        <div className="flex gap-2">
+        <nav className="flex gap-2 order-1 sm:order-2" aria-label="Lesson navigation">
           {prevHref && (
             <Link
               href={prevHref}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Previous
+              ← Previous
             </Link>
           )}
           {nextHref && (
             <Link
               href={nextHref}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700"
+              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
             >
-              Next
+              Next →
             </Link>
           )}
-        </div>
+        </nav>
       </div>
     </div>
   );

@@ -1,35 +1,41 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useActionState } from "react";
-
-type ActionResult = { success: true; id?: string } | { success: false; error: string };
+import { createModuleAction, updateModuleAction } from "@/app/actions/modules";
+import type { ModuleActionResult } from "@/app/actions/modules";
 
 interface ModuleFormProps {
-  action: (formData: FormData) => Promise<ActionResult>;
   initialTitle?: string;
   initialDescription?: string | null;
   initialSortOrder?: number;
   initialPublished?: boolean;
   moduleId?: string;
-  updateAction?: (moduleId: string, prev: unknown, formData: FormData) => Promise<ActionResult>;
 }
 
 export function ModuleForm({
-  action,
   initialTitle = "",
   initialDescription = null,
   initialSortOrder = 0,
   initialPublished = false,
   moduleId,
-  updateAction,
 }: ModuleFormProps) {
-  const isEdit = Boolean(moduleId && updateAction);
+  const router = useRouter();
+  const isEdit = Boolean(moduleId);
   const [state, formAction, isPending] = useActionState(
-    isEdit && updateAction && moduleId
-      ? (prev: ActionResult | null, fd: FormData) => updateAction(moduleId, prev, fd)
-      : (_prev: ActionResult | null, fd: FormData) => action(fd),
-    null as ActionResult | null
+    isEdit && moduleId
+      ? (_prev: ModuleActionResult | null, fd: FormData) =>
+          updateModuleAction(moduleId, _prev, fd)
+      : (_prev: ModuleActionResult | null, fd: FormData) => createModuleAction(_prev, fd),
+    null as ModuleActionResult | null
   );
+
+  useEffect(() => {
+    if (state?.success && state.id) {
+      router.push(`/admin/modules/${state.id}`);
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className="space-y-4 max-w-md">

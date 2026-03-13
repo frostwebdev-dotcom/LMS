@@ -5,9 +5,10 @@ import { getModuleForStaff } from "@/services/module-service";
 import { getContentByModuleId } from "@/services/content-service";
 import { getQuizByModuleId } from "@/services/quiz-service";
 import { getContentProgressSet, getQuizBestAttempt } from "@/services/progress-service";
-import type { ContentType } from "@/types/database";
+import { LessonList } from "@/components/content/LessonList";
+import type { ModuleContent } from "@/types/database";
 
-export default async function ModulePage({
+export default async function ModuleDetailPage({
   params,
 }: {
   params: Promise<{ moduleId: string }>;
@@ -30,81 +31,64 @@ export default async function ModulePage({
     ? await getQuizBestAttempt(user.id, quiz.id)
     : null;
 
+  const lessonsWithState = content.map((item) => ({
+    ...item,
+    completed: completedContent.has(item.id),
+  }));
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard"
-          className="text-sm text-slate-600 hover:text-slate-900"
-        >
-          ← Back to modules
+    <div className="space-y-8">
+      <nav className="flex items-center gap-2 text-sm">
+        <Link href="/dashboard" className="text-slate-500 hover:text-slate-700">
+          Dashboard
         </Link>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">{module.title}</h1>
+        <span className="text-slate-400">/</span>
+        <span className="font-medium text-slate-900">{module.title}</span>
+      </nav>
+
+      <header>
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          {module.title}
+        </h1>
         {module.description && (
           <p className="mt-2 text-slate-600">{module.description}</p>
         )}
-      </div>
+      </header>
 
-      {content.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold text-slate-800 mb-3">Content</h2>
-          <ul className="space-y-2">
-            {content.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={`/dashboard/modules/${moduleId}/content/${item.id}`}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50"
-                >
-                  <span className="font-medium text-slate-800">{item.title}</span>
-                  <span className="flex items-center gap-2 text-sm text-slate-500">
-                    <ContentTypeBadge type={item.content_type} />
-                    {completedContent.has(item.id) && (
-                      <span className="text-green-600">Done</span>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <section aria-labelledby="lessons-heading">
+        <h2 id="lessons-heading" className="text-lg font-semibold text-slate-900 mb-4">
+          Lessons
+        </h2>
+        <LessonList moduleId={moduleId} lessons={lessonsWithState} />
+      </section>
 
       {quiz && (
-        <section>
-          <h2 className="text-lg font-semibold text-slate-800 mb-3">Quiz</h2>
+        <section aria-labelledby="quiz-heading">
+          <h2 id="quiz-heading" className="text-lg font-semibold text-slate-900 mb-4">
+            Quiz
+          </h2>
           <Link
             href={`/dashboard/modules/${moduleId}/quiz`}
-            className="block rounded-lg border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-primary-200 hover:bg-slate-50 sm:px-5"
           >
-            <span className="font-medium text-slate-800">{quiz.title}</span>
-            {quizAttempt && (
-              <span className="ml-2 text-sm text-slate-500">
+            <span className="font-medium text-slate-900">{quiz.title}</span>
+            {quizAttempt ? (
+              <span className="text-sm text-slate-600">
                 Best: {quizAttempt.score_percent}%
                 {quizAttempt.passed ? " (passed)" : " (not passed)"}
               </span>
+            ) : (
+              <span className="text-sm text-slate-500">Not attempted</span>
             )}
           </Link>
         </section>
       )}
 
       {content.length === 0 && !quiz && (
-        <p className="text-slate-600">No content or quiz in this module yet.</p>
+        <p className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-600">
+          No content or quiz in this module yet.
+        </p>
       )}
     </div>
-  );
-}
-
-function ContentTypeBadge({ type }: { type: ContentType }) {
-  const labels: Record<ContentType, string> = {
-    video: "Video",
-    pdf: "PDF",
-    presentation: "Presentation",
-  };
-  return (
-    <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-      {labels[type]}
-    </span>
   );
 }

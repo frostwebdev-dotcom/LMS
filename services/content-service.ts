@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { TRAINING_CONTENT_BUCKET } from "@/lib/storage/constants";
 import type { ModuleContent } from "@/types/database";
 
 export async function getContentByModuleId(moduleId: string): Promise<ModuleContent[]> {
@@ -33,7 +34,7 @@ export async function getContentById(contentId: string): Promise<ModuleContent |
 export async function getSignedUrl(storagePath: string): Promise<string> {
   const supabase = await createClient();
   const { data, error } = await supabase.storage
-    .from("training-content")
+    .from(TRAINING_CONTENT_BUCKET)
     .createSignedUrl(storagePath, 3600);
   if (error) throw new Error(error.message);
   if (!data?.signedUrl) throw new Error("Failed to create signed URL");
