@@ -7,6 +7,8 @@ import {
   createQuizSchema,
   createQuestionSchema,
   createOptionSchema,
+  updateQuestionSchema,
+  updateOptionSchema,
 } from "@/lib/validations/quiz";
 
 export type QuizAdminResult = { success: true; id?: string } | { success: false; error: string };
@@ -85,6 +87,66 @@ export async function addOptionAction(
     is_correct: parsed.data.is_correct,
     sort_order: parsed.data.sort_order ?? 0,
   });
+  if (error) return { success: false, error: error.message };
+  revalidatePath(`/admin/modules/${moduleId}/quiz/edit`);
+  return { success: true };
+}
+
+export async function updateQuestionAction(
+  questionId: string,
+  moduleId: string,
+  _prev: unknown,
+  formData: FormData
+): Promise<QuizAdminResult> {
+  await requireAdmin();
+  const parsed = updateQuestionSchema.safeParse({
+    question_text: formData.get("question_text") ?? "",
+    sort_order: formData.get("sort_order") !== undefined && formData.get("sort_order") !== ""
+      ? Number(formData.get("sort_order"))
+      : undefined,
+  });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("quiz_questions")
+    .update({
+      question_text: parsed.data.question_text,
+      ...(parsed.data.sort_order !== undefined && { sort_order: parsed.data.sort_order }),
+    })
+    .eq("id", questionId);
+  if (error) return { success: false, error: error.message };
+  revalidatePath(`/admin/modules/${moduleId}/quiz/edit`);
+  return { success: true };
+}
+
+export async function updateOptionAction(
+  optionId: string,
+  moduleId: string,
+  _prev: unknown,
+  formData: FormData
+): Promise<QuizAdminResult> {
+  await requireAdmin();
+  const parsed = updateOptionSchema.safeParse({
+    option_text: formData.get("option_text") ?? "",
+    is_correct: formData.get("is_correct") === "on" || formData.get("is_correct") === "true",
+    sort_order: formData.get("sort_order") !== undefined && formData.get("sort_order") !== ""
+      ? Number(formData.get("sort_order"))
+      : undefined,
+  });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("quiz_answers")
+    .update({
+      answer_text: parsed.data.option_text,
+      is_correct: parsed.data.is_correct,
+      ...(parsed.data.sort_order !== undefined && { sort_order: parsed.data.sort_order }),
+    })
+    .eq("id", optionId);
   if (error) return { success: false, error: error.message };
   revalidatePath(`/admin/modules/${moduleId}/quiz/edit`);
   return { success: true };

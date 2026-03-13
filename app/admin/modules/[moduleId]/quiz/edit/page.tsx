@@ -2,9 +2,16 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getModuleById } from "@/services/module-service";
 import { getQuizByModuleId, getQuizWithQuestions } from "@/services/quiz-service";
-import { addQuestionAction, addOptionAction } from "@/app/actions/quiz-admin";
+import {
+  addQuestionAction,
+  addOptionAction,
+  updateQuestionAction,
+  updateOptionAction,
+} from "@/app/actions/quiz-admin";
 import { AddQuestionForm } from "@/components/admin/AddQuestionForm";
 import { AddOptionForm } from "@/components/admin/AddOptionForm";
+import { EditQuestionForm } from "@/components/admin/EditQuestionForm";
+import { EditOptionForm } from "@/components/admin/EditOptionForm";
 
 export default async function EditQuizPage({
   params,
@@ -51,13 +58,27 @@ export default async function EditQuizPage({
             {quizWithQuestions.questions.map((q, idx) => (
               <li key={q.id} className="rounded-lg border border-slate-200 bg-white p-4">
                 <p className="font-medium text-slate-800">
-                  {idx + 1}. {q.question_text}
+                  {idx + 1}. Edit question
                 </p>
-                <ul className="mt-2 ml-4 list-disc text-sm text-slate-600">
+                <EditQuestionForm
+                  questionId={q.id}
+                  moduleId={moduleId}
+                  initialQuestionText={q.question_text}
+                  initialSortOrder={q.sort_order}
+                  action={updateQuestionAction}
+                />
+                <p className="mt-3 text-sm font-medium text-slate-700">Answer options</p>
+                <ul className="mt-1 space-y-1">
                   {q.options.map((opt) => (
-                    <li key={opt.id}>
-                      {opt.option_text}
-                      {opt.is_correct && " ✓"}
+                    <li key={opt.id} className="rounded border border-slate-100 bg-slate-50/50 px-2">
+                      <EditOptionForm
+                        optionId={opt.id}
+                        moduleId={moduleId}
+                        initialOptionText={opt.option_text}
+                        initialIsCorrect={opt.is_correct}
+                        initialSortOrder={opt.sort_order}
+                        action={updateOptionAction}
+                      />
                     </li>
                   ))}
                 </ul>

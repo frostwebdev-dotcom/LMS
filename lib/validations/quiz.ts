@@ -26,6 +26,17 @@ export const createOptionSchema = z.object({
   sort_order: z.number().int().min(0).optional(),
 });
 
+export const updateQuestionSchema = z.object({
+  question_text: z.string().min(1, "Question text is required").max(2000),
+  sort_order: z.number().int().min(0).optional(),
+});
+
+export const updateOptionSchema = z.object({
+  option_text: z.string().min(1, "Option text is required").max(1000),
+  is_correct: z.boolean(),
+  sort_order: z.number().int().min(0).optional(),
+});
+
 export const submitQuizSchema = z.object({
   quiz_id: z.string().uuid(),
   answers: z.array(
@@ -40,4 +51,6 @@ export type CreateQuizInput = z.infer<typeof createQuizSchema>;
 export type UpdateQuizInput = z.infer<typeof updateQuizSchema>;
 export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
 export type CreateOptionInput = z.infer<typeof createOptionSchema>;
+export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;
+export type UpdateOptionInput = z.infer<typeof updateOptionSchema>;
 export type SubmitQuizInput = z.infer<typeof submitQuizSchema>;
