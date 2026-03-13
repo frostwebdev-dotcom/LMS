@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { TRAINING_CONTENT_BUCKET } from "./constants";
-import { validateLessonFile, type LessonMediaType } from "./validate-upload";
+import { TRAINING_CONTENT_BUCKET, type LessonMediaType } from "./constants";
+import { validateLessonFile } from "./validate-upload";
 
 export type UploadLessonFileResult =
   | {
