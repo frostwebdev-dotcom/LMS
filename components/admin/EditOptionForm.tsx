@@ -36,11 +36,12 @@ export function EditOptionForm({
       {state?.success === false && state?.error && (
         <span className="w-full text-sm text-red-600">{state.error}</span>
       )}
-      <input
+      <textarea
         name="option_text"
         defaultValue={initialOptionText}
         required
-        className="min-w-[280px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+        rows={2}
+        className="min-w-[560px] w-full max-w-2xl flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 resize-y"
         aria-label="Option text"
       />
       <label className="flex items-center gap-1 text-sm text-slate-600">

@@ -41,32 +41,10 @@ export interface ModuleContent {
   updated_at: string;
 }
 
-export interface Quiz {
-  id: string;
-  module_id: string;
-  title: string;
-  description: string | null;
-  passing_score_percent: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface QuizQuestion {
-  id: string;
-  quiz_id: string;
-  question_text: string;
-  sort_order: number;
-  created_at: string;
-}
-
-export interface QuizOption {
-  id: string;
-  question_id: string;
-  option_text: string;
-  is_correct: boolean;
-  sort_order: number;
-  created_at: string;
-}
+/** @deprecated Use types from @/types/quiz */
+export type { Quiz, QuizQuestion, QuizAttempt } from "./quiz";
+/** QuizAnswer in quiz has option_text; alias for backward compatibility */
+export type { QuizAnswer as QuizOption } from "./quiz";
 
 export interface ModuleProgress {
   id: string;
@@ -86,20 +64,5 @@ export interface ContentProgress {
   updated_at: string;
 }
 
-export interface QuizAttempt {
-  id: string;
-  user_id: string;
-  quiz_id: string;
-  score_percent: number;
-  passed: boolean;
-  completed_at: string;
-  created_at: string;
-}
-
-export interface QuizAttemptAnswer {
-  id: string;
-  attempt_id: string;
-  question_id: string;
-  option_id: string | null;
-  created_at: string;
-}
+/** @deprecated Use types from @/types/quiz */
+export type { QuizAttemptAnswer } from "./quiz";

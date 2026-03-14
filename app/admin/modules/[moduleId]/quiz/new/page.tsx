@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getModuleById } from "@/services/module-service";
-import { createQuizAction } from "@/app/actions/quiz-admin";
+import { createQuizAndRedirectAction } from "@/app/actions/quiz-admin";
 import { QuizFormAdmin } from "@/components/admin/QuizFormAdmin";
 
 export default async function NewQuizPage({
@@ -14,15 +13,6 @@ export default async function NewQuizPage({
   const trainingModule = await getModuleById(moduleId);
   if (!trainingModule) notFound();
 
-  async function handleCreate(formData: FormData) {
-    "use server";
-    const result = await createQuizAction(moduleId, null, formData);
-    if (result.success && result.id) {
-      redirect(`/admin/modules/${moduleId}/quiz/edit`);
-    }
-    return result;
-  }
-
   return (
     <div className="space-y-6">
       <Link
@@ -32,7 +22,12 @@ export default async function NewQuizPage({
         ← Back to module
       </Link>
       <h1 className="text-2xl font-bold text-slate-800">New quiz</h1>
-      <QuizFormAdmin action={handleCreate} />
+      <p className="text-slate-600 text-sm">
+        Set the title, optional description, and passing score. After creating, you can add questions and answer choices on the edit page.
+      </p>
+      <QuizFormAdmin
+        action={(formData) => createQuizAndRedirectAction(moduleId, null, formData)}
+      />
     </div>
   );
 }

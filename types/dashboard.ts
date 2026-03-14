@@ -5,6 +5,12 @@
 
 export type ModuleProgressStatus = "not_started" | "in_progress" | "completed";
 
+/** Quiz result for a module (when module has a quiz). null = no quiz or not attempted. */
+export interface ModuleQuizResult {
+  bestScorePercent: number;
+  passed: boolean;
+}
+
 export interface StaffDashboardModule {
   id: string;
   title: string;
@@ -16,4 +22,6 @@ export interface StaffDashboardModule {
   contentCount: number;
   quizCount: number;
   progressCompletedAt: string | null;
+  /** Best quiz score and pass status. null when module has no quiz or user has not attempted. */
+  quizResult: ModuleQuizResult | null;
 }

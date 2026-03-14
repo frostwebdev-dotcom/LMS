@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AUTH_LOGIN_PATH, STAFF_ROUTE_PREFIX } from "@/lib/auth/config";
+import { AUTH_LOGIN_PATH, ADMIN_DEFAULT_PATH, STAFF_ROUTE_PREFIX } from "@/lib/auth/config";
 import { normalizeRole, roleFromSource } from "@/lib/auth/guards";
 import type { SessionUser } from "@/types/auth";
 import type { UserRole } from "@/types/database";
@@ -133,5 +133,15 @@ export async function requireUserOrRedirect(): Promise<SessionUser> {
 export async function requireAdminOrRedirect(): Promise<SessionUser> {
   const user = await requireUserOrRedirect();
   if (!isAdmin(user)) redirect(STAFF_ROUTE_PREFIX);
+  return user;
+}
+
+/**
+ * Route guard: requires authenticated staff only. Redirects to login if unauthenticated,
+ * or to admin if user is admin (so only staff can take quizzes from dashboard).
+ */
+export async function requireStaffOrRedirect(): Promise<SessionUser> {
+  const user = await requireUserOrRedirect();
+  if (isAdmin(user)) redirect(ADMIN_DEFAULT_PATH);
   return user;
 }

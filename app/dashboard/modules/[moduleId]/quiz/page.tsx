@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth/get-session";
+import { requireStaffOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { getQuizByModuleId, getQuizWithQuestions } from "@/services/quiz-service";
 import { QuizForm } from "@/components/quiz/QuizForm";
@@ -12,8 +12,7 @@ export default async function QuizPage({
   params: Promise<{ moduleId: string }>;
 }) {
   const { moduleId } = await params;
-  const user = await getSessionUser();
-  if (!user) notFound();
+  await requireStaffOrRedirect();
 
   const [module, quiz] = await Promise.all([
     getModuleForStaff(moduleId),

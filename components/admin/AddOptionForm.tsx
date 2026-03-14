@@ -34,14 +34,20 @@ export function AddOptionForm({
       {state?.success === false && state?.error && (
         <span className="text-sm text-red-600">{state.error}</span>
       )}
+      <label htmlFor={`add-option-text-${questionId}`} className="sr-only">
+        Option text
+      </label>
       <input
+        id={`add-option-text-${questionId}`}
         name="option_text"
         placeholder="Option text"
         required
+        maxLength={1000}
         className="min-w-[280px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+        aria-required="true"
       />
-      <label className="flex items-center gap-1 text-sm">
-        <input name="is_correct" type="checkbox" value="on" className="rounded" />
+      <label className="flex items-center gap-1 text-sm text-slate-600">
+        <input name="is_correct" type="checkbox" value="on" className="rounded" aria-label="Mark as correct answer" />
         Correct
       </label>
       <button

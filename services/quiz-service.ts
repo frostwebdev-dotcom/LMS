@@ -1,13 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Quiz, QuizQuestion, QuizOption } from "@/types/database";
+import type {
+  Quiz,
+  QuizRow,
+  QuizWithQuestions,
+  QuestionWithOptions,
+  UpdateQuizInput,
+} from "@/types/quiz";
+import { getQuestionsByQuizId } from "@/services/quiz-questions-service";
+import { getAnswersByQuestionIds } from "@/services/quiz-answers-service";
 
-export interface QuestionWithOptions extends QuizQuestion {
-  options: QuizOption[];
-}
-
-export interface QuizWithQuestions extends Quiz {
-  questions: QuestionWithOptions[];
-}
+export type { QuizWithQuestions, QuestionWithOptions } from "@/types/quiz";
 
 export async function getQuizByModuleId(moduleId: string): Promise<Quiz | null> {
   const supabase = await createClient();
@@ -24,6 +26,19 @@ export async function getQuizByModuleId(moduleId: string): Promise<Quiz | null> 
   return data as Quiz;
 }
 
+export async function getQuizById(quizId: string): Promise<Quiz | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("quizzes").select("*").eq("id", quizId).single();
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(error.message);
+  }
+  return data as Quiz;
+}
+
+/**
+ * Fetches a quiz with all questions and answers (options), ordered by sort_order.
+ */
 export async function getQuizWithQuestions(quizId: string): Promise<QuizWithQuestions | null> {
   const supabase = await createClient();
   const { data: quiz, error: quizError } = await supabase
@@ -33,55 +48,46 @@ export async function getQuizWithQuestions(quizId: string): Promise<QuizWithQues
     .single();
   if (quizError || !quiz) return null;
 
-  const { data: questions, error: qError } = await supabase
-    .from("quiz_questions")
-    .select("*")
-    .eq("quiz_id", quizId)
-    .order("sort_order", { ascending: true });
-  if (qError) throw new Error(qError.message);
-
-  if (!questions?.length) {
-    return { ...quiz, questions: [] } as QuizWithQuestions;
+  const questions = await getQuestionsByQuizId(quizId);
+  if (questions.length === 0) {
+    return { ...(quiz as QuizRow), questions: [] } as QuizWithQuestions;
   }
 
-  const { data: options, error: optError } = await supabase
-    .from("quiz_answers")
-    .select("*")
-    .in("question_id", questions.map((q) => q.id))
-    .order("sort_order", { ascending: true });
-  if (optError) throw new Error(optError.message);
+  const questionIds = questions.map((q) => q.id);
+  const answers = await getAnswersByQuestionIds(questionIds);
 
-  const optionsByQuestion = new Map<string, QuizOption[]>();
-  for (const opt of options ?? []) {
-    const row = opt as { id: string; question_id: string; answer_text: string; is_correct: boolean; sort_order: number; created_at: string };
-    const list = optionsByQuestion.get(row.question_id) ?? [];
-    list.push({ ...row, option_text: row.answer_text } as QuizOption);
-    optionsByQuestion.set(row.question_id, list);
+  const optionsByQuestion = new Map<string, typeof answers>();
+  for (const a of answers) {
+    const list = optionsByQuestion.get(a.question_id) ?? [];
+    list.push(a);
+    optionsByQuestion.set(a.question_id, list);
   }
 
-  const questionsWithOptions: QuestionWithOptions[] = (questions as QuizQuestion[]).map(
-    (q) => ({
-      ...q,
-      options: optionsByQuestion.get(q.id) ?? [],
-    })
-  );
+  const questionsWithOptions: QuestionWithOptions[] = questions.map((q) => ({
+    ...q,
+    options: optionsByQuestion.get(q.id) ?? [],
+  }));
 
   return {
-    ...quiz,
+    ...(quiz as QuizRow),
     questions: questionsWithOptions,
   } as QuizWithQuestions;
 }
 
-export async function getQuizById(quizId: string): Promise<Quiz | null> {
+/**
+ * Updates quiz metadata (title, description, passing_score_percent). Used by admin.
+ */
+export async function updateQuiz(
+  quizId: string,
+  input: UpdateQuizInput
+): Promise<void> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("quizzes")
-    .select("*")
-    .eq("id", quizId)
-    .single();
-  if (error) {
-    if (error.code === "PGRST116") return null;
-    throw new Error(error.message);
-  }
-  return data as Quiz;
+  const payload: Record<string, unknown> = {};
+  if (input.title !== undefined) payload.title = input.title;
+  if (input.description !== undefined) payload.description = input.description;
+  if (input.passing_score_percent !== undefined)
+    payload.passing_score_percent = input.passing_score_percent;
+  if (Object.keys(payload).length === 0) return;
+  const { error } = await supabase.from("quizzes").update(payload).eq("id", quizId);
+  if (error) throw new Error(error.message);
 }

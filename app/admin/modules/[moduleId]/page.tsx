@@ -5,6 +5,7 @@ import { getContentByModuleId } from "@/services/content-service";
 import { getQuizByModuleId } from "@/services/quiz-service";
 import { ModuleForm } from "@/components/admin/ModuleForm";
 import { ModuleDeleteForm } from "@/components/admin/ModuleDeleteForm";
+import { ResetModuleProgressForm } from "@/components/admin/ResetModuleProgressForm";
 import { AdminContentList } from "@/components/admin/AdminContentList";
 import { AdminQuizSection } from "@/components/admin/AdminQuizSection";
 
@@ -40,6 +41,17 @@ export default async function AdminModuleDetailPage({
           initialPublished={trainingModule.is_published}
         />
         <ModuleDeleteForm moduleId={moduleId} />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-slate-800 mb-3">Reset training</h2>
+        <p className="text-sm text-slate-600 mb-2">
+          Clear all staff progress for this module (e.g. for annual re-training). Staff will need to re-complete lessons and re-take the quiz.
+        </p>
+        <ResetModuleProgressForm
+          moduleId={moduleId}
+          moduleTitle={trainingModule.title}
+        />
       </section>
 
       <section>

@@ -22,25 +22,38 @@ export function AddQuestionForm({ quizId, moduleId, action }: AddQuestionFormPro
   );
 
   return (
-    <form action={formAction} className="space-y-2">
-      <h2 className="text-lg font-semibold text-slate-800">Add question</h2>
+    <form action={formAction} className="space-y-2" aria-label="Add a new question">
       {state?.success === false && state?.error && (
         <p className="text-sm text-red-600">{state.error}</p>
       )}
       <input type="hidden" name="quiz_id" value={quizId} />
-      <input
-        name="question_text"
-        placeholder="Question text"
-        required
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
-      />
-      <input
-        name="sort_order"
-        type="number"
-        min={0}
-        defaultValue={0}
-        className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
-      />
+      <div>
+        <label htmlFor="add-question-text" className="sr-only">
+          Question text
+        </label>
+        <input
+          id="add-question-text"
+          name="question_text"
+          placeholder="Question text"
+          required
+          maxLength={2000}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+          aria-required="true"
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <label htmlFor="add-question-sort" className="text-sm text-slate-600">
+          Order
+        </label>
+        <input
+          id="add-question-sort"
+          name="sort_order"
+          type="number"
+          min={0}
+          defaultValue={0}
+          className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+        />
+      </div>
       <button
         type="submit"
         disabled={isPending}

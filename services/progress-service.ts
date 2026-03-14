@@ -1,80 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
+import { submitQuiz } from "@/services/quiz-submission-service";
+import { updateModuleCompletionIfEligible } from "@/services/module-completion-service";
+import type { QuizSubmitResult } from "@/types/quiz";
 
-export interface QuizResult {
-  scorePercent: number;
-  passed: boolean;
-  totalQuestions: number;
-  correctCount: number;
-}
+export type { QuizSubmitResult } from "@/types/quiz";
 
 /**
- * Calculate quiz score and persist attempt. Call from server action with validated input.
+ * Calculate quiz score and persist attempt. Delegates to quiz-submission-service.
  */
 export async function submitQuizAndGetResult(
   userId: string,
   quizId: string,
   answers: { question_id: string; option_id: string }[]
-): Promise<QuizResult> {
-  const supabase = await createClient();
-
-  const { data: options, error: optError } = await supabase
-    .from("quiz_answers")
-    .select("id, question_id, is_correct")
-    .in("question_id", answers.map((a) => a.question_id));
-
-  if (optError) throw new Error(optError.message);
-
-  const correctSet = new Set(
-    (options ?? [])
-      .filter((o) => o.is_correct)
-      .map((o) => o.id)
-  );
-
-  let correctCount = 0;
-  const answerMap = new Map(answers.map((a) => [a.question_id, a.option_id]));
-  for (const o of options ?? []) {
-    const chosen = answerMap.get(o.question_id);
-    if (chosen === o.id && o.is_correct) correctCount++;
-  }
-
-  const totalQuestions = new Set(options?.map((o) => o.question_id) ?? []).size;
-  const scorePercent =
-    totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100);
-
-  const { data: quiz, error: quizError } = await supabase
-    .from("quizzes")
-    .select("passing_score_percent")
-    .eq("id", quizId)
-    .single();
-  if (quizError || !quiz) throw new Error("Quiz not found");
-  const passed = scorePercent >= (quiz.passing_score_percent ?? 80);
-
-  const { data: attempt, error: attemptError } = await supabase
-    .from("quiz_attempts")
-    .insert({
-      user_id: userId,
-      quiz_id: quizId,
-      score_percent: scorePercent,
-      passed,
-    })
-    .select("id")
-    .single();
-  if (attemptError) throw new Error(attemptError.message);
-
-  for (const a of answers) {
-    await supabase.from("quiz_attempt_answers").insert({
-      attempt_id: attempt.id,
-      question_id: a.question_id,
-      answer_id: a.option_id,
-    });
-  }
-
-  return {
-    scorePercent,
-    passed,
-    totalQuestions,
-    correctCount,
-  };
+): Promise<QuizSubmitResult> {
+  return submitQuiz(userId, { quiz_id: quizId, answers });
 }
 
 export async function markContentComplete(userId: string, contentId: string): Promise<void> {
@@ -88,6 +27,15 @@ export async function markContentComplete(userId: string, contentId: string): Pr
     { onConflict: "user_id,lesson_id" }
   );
   if (error) throw new Error(error.message);
+
+  const { data: lesson } = await supabase
+    .from("training_lessons")
+    .select("module_id")
+    .eq("id", contentId)
+    .single();
+  if (lesson?.module_id) {
+    await updateModuleCompletionIfEligible(userId, lesson.module_id);
+  }
 }
 
 export async function markModuleComplete(userId: string, moduleId: string): Promise<void> {

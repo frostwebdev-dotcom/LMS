@@ -1,9 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
-import type { StaffDashboardModule, ModuleProgressStatus } from "@/types/dashboard";
+import type {
+  StaffDashboardModule,
+  ModuleProgressStatus,
+  ModuleQuizResult,
+} from "@/types/dashboard";
 
 /**
  * Fetches all published (assigned/available) training modules for the given
  * staff user with status and progress percent. No mock data.
+ * Module completion (progressCompletedAt) is set only when all required lessons
+ * are viewed and the quiz is passed (see module-completion-service).
  */
 export async function getStaffDashboardModules(
   userId: string
@@ -27,12 +33,14 @@ export async function getStaffDashboardModules(
     completedLessonIds,
     quizzesByModule,
     passedQuizIds,
+    bestQuizAttemptByQuizId,
   ] = await Promise.all([
     getModuleProgressMap(supabase, userId, moduleIds),
     getLessonIdsByModule(supabase, moduleIds),
     getCompletedLessonIds(supabase, userId, moduleIds),
     getQuizzesByModule(supabase, moduleIds),
     getPassedQuizIds(supabase, userId, moduleIds),
+    getBestQuizAttemptByQuizId(supabase, userId, moduleIds),
   ]);
 
   return modules.map((m) => {
@@ -49,14 +57,20 @@ export async function getStaffDashboardModules(
     const progressPercent =
       totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
-    const status: ModuleProgressStatus = progressCompletedAt
-      ? "completed"
-      : progressPercent > 0
-        ? "in_progress"
-        : "not_started";
+    const status: ModuleProgressStatus =
+      progressCompletedAt || progressPercent === 100
+        ? "completed"
+        : progressPercent > 0
+          ? "in_progress"
+          : "not_started";
 
     const contentCount = lessonIds.length;
     const quizCount = quiz ? 1 : 0;
+    const quizResult: ModuleQuizResult | null =
+      quiz && bestQuizAttemptByQuizId.has(quiz.id)
+        ? bestQuizAttemptByQuizId.get(quiz.id)! 
+        : null;
+
     const dbDuration = (m as { estimated_duration_minutes?: number | null }).estimated_duration_minutes;
     const estimatedDurationMinutes =
       typeof dbDuration === "number" && dbDuration >= 0
@@ -73,8 +87,44 @@ export async function getStaffDashboardModules(
       contentCount,
       quizCount,
       progressCompletedAt,
+      quizResult,
     };
   });
+}
+
+/** Best attempt (by score) per quiz for the user. Only includes quizzes that have been attempted. */
+async function getBestQuizAttemptByQuizId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  moduleIds: string[]
+): Promise<Map<string, ModuleQuizResult>> {
+  const { data: quizzes } = await supabase
+    .from("quizzes")
+    .select("id")
+    .in("module_id", moduleIds);
+  const quizIds = (quizzes ?? []).map((q) => q.id);
+  if (quizIds.length === 0) return new Map();
+
+  const { data: attempts } = await supabase
+    .from("quiz_attempts")
+    .select("quiz_id, score_percent, passed")
+    .eq("user_id", userId)
+    .in("quiz_id", quizIds);
+
+  const byQuiz = new Map<string, ModuleQuizResult>();
+  for (const a of attempts ?? []) {
+    const existing = byQuiz.get(a.quiz_id);
+    const score = a.score_percent ?? 0;
+    const passed = !!a.passed;
+    if (!existing) {
+      byQuiz.set(a.quiz_id, { bestScorePercent: score, passed });
+    } else {
+      const bestScore = Math.max(existing.bestScorePercent, score);
+      const everPassed = existing.passed || passed;
+      byQuiz.set(a.quiz_id, { bestScorePercent: bestScore, passed: everPassed });
+    }
+  }
+  return byQuiz;
 }
 
 async function getModuleProgressMap(
