@@ -64,31 +64,31 @@ export function ContentViewer({
             className="w-full aspect-video min-h-[60vh]"
           />
         )}
-        {contentType === "presentation" && (hasPresentationViewer ? (
+        {contentType === "presentation" && hasMedia && (
           <>
-            <iframe
-              src={iframeSrc}
-              title="Presentation"
-              className="w-full aspect-video min-h-[60vh]"
-            />
-            {hasMedia && (
-              <p className="p-3 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
-                If the presentation doesn’t load above,{" "}
-                <a href={signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 font-medium underline">
-                  open or download it here
-                </a>.
+            <div className="p-4 bg-primary-50 border-b border-primary-100 rounded-t-xl">
+              <p className="text-sm text-slate-700 mb-2">
+                Presentations open best in a new tab or as a download. Open the file, view it, then return here and mark as complete.
               </p>
+              <a
+                href={signedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
+              >
+                Open presentation
+                <span aria-hidden>↗</span>
+              </a>
+            </div>
+            {hasPresentationViewer && (
+              <iframe
+                src={iframeSrc}
+                title="Presentation preview (may show “No preview available”)"
+                className="w-full aspect-video min-h-[40vh]"
+              />
             )}
           </>
-        ) : hasMedia ? (
-          <p className="p-4 text-slate-600 text-sm">
-            This presentation cannot be shown in-browser here. You can{" "}
-            <a href={signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">
-              open it in a new tab
-            </a>{" "}
-            (it may download).
-          </p>
-        ) : null)}
+        )}
         {contentType === "text" && (
           <div className="p-4 sm:p-6 min-h-[200px]">
             {hasText ? (
