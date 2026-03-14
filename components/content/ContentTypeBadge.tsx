@@ -8,7 +8,7 @@ interface ContentTypeBadgeProps {
 const labels: Record<ContentType, string> = {
   video: "Video",
   pdf: "PDF",
-  presentation: "Presentation",
+  image: "Image",
   text: "Text",
 };
 

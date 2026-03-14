@@ -5,9 +5,12 @@ import { getContentById, getSignedUrl } from "@/services/content-service";
 export const dynamic = "force-dynamic";
 
 const CONTENT_TYPES: Record<string, string> = {
-  ppt: "application/vnd.ms-powerpoint",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
 };
 
 /**
@@ -38,7 +41,7 @@ export async function GET(
   const isMedia =
     content.content_type === "video" ||
     content.content_type === "pdf" ||
-    content.content_type === "presentation";
+    content.content_type === "image";
   const storagePath = content.storage_path && String(content.storage_path).trim();
   if (!isMedia || !storagePath) {
     return NextResponse.json({ error: "Not a viewable file" }, { status: 400 });

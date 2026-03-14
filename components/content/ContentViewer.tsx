@@ -7,10 +7,8 @@ import type { ContentType } from "@/types/database";
 
 interface ContentViewerProps {
   contentType: ContentType;
-  /** Signed URL for media (video/pdf/presentation). Empty for text or when unavailable. */
+  /** Signed URL for media (video/pdf/image). Empty for text or when unavailable. */
   signedUrl: string;
-  /** For presentation type: Office Online embed URL so PPT/PPTX display in-browser. Empty to fall back to signedUrl (may download). */
-  presentationViewerUrl?: string;
   /** Plain text for lesson_type = 'text'. */
   contentText?: string | null;
   contentId: string;
@@ -22,7 +20,6 @@ interface ContentViewerProps {
 export function ContentViewer({
   contentType,
   signedUrl,
-  presentationViewerUrl = "",
   contentText,
   contentId,
   moduleId,
@@ -37,14 +34,9 @@ export function ContentViewer({
     });
   };
 
-  const isMedia = contentType === "video" || contentType === "pdf" || contentType === "presentation";
+  const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image";
   const hasMedia = isMedia && !!signedUrl;
   const hasText = contentType === "text" && contentText;
-  const iframeSrc =
-    contentType === "presentation" && presentationViewerUrl
-      ? presentationViewerUrl
-      : signedUrl;
-  const hasPresentationViewer = contentType === "presentation" && !!iframeSrc;
 
   return (
     <div className="space-y-4">
@@ -64,30 +56,15 @@ export function ContentViewer({
             className="w-full aspect-video min-h-[60vh]"
           />
         )}
-        {contentType === "presentation" && hasMedia && (
-          <>
-            <div className="p-4 bg-primary-50 border-b border-primary-100 rounded-t-xl">
-              <p className="text-sm text-slate-700 mb-2">
-                Presentations open best in a new tab or as a download. Open the file, view it, then return here and mark as complete.
-              </p>
-              <a
-                href={signedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
-              >
-                Open presentation
-                <span aria-hidden>↗</span>
-              </a>
-            </div>
-            {hasPresentationViewer && (
-              <iframe
-                src={iframeSrc}
-                title="Presentation preview (may show “No preview available”)"
-                className="w-full aspect-video min-h-[40vh]"
-              />
-            )}
-          </>
+        {contentType === "image" && hasMedia && (
+          <div className="flex justify-center bg-slate-100 p-4 min-h-[40vh]">
+            <img
+              src={signedUrl}
+              alt="Image"
+              className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
+              draggable={false}
+            />
+          </div>
         )}
         {contentType === "text" && (
           <div className="p-4 sm:p-6 min-h-[200px]">

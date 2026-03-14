@@ -10,14 +10,14 @@ interface AdminContentListProps {
 const contentTypeLabel: Record<ModuleContent["content_type"], string> = {
   video: "Video",
   pdf: "PDF",
-  presentation: "Presentation",
+  image: "Image",
   text: "Text",
 };
 
 export function AdminContentList({ moduleId, content }: AdminContentListProps) {
   if (content.length === 0) {
     return (
-      <p className="text-slate-600 text-sm">No lessons yet. Add video, PDF, or presentation.</p>
+      <p className="text-slate-600 text-sm">No lessons yet. Add video, PDF, or image.</p>
     );
   }
   return (

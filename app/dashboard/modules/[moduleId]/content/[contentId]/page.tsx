@@ -3,14 +3,7 @@ import Link from "next/link";
 import { getSessionUser } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { getContentById, getContentByModuleId, getSignedUrl } from "@/services/content-service";
-import { createContentViewToken } from "@/lib/content-view-token";
 import { ContentViewer } from "@/components/content/ContentViewer";
-
-function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
 
 export default async function LessonViewerPage({
   params,
@@ -32,7 +25,7 @@ export default async function LessonViewerPage({
   const isMedia =
     content.content_type === "video" ||
     content.content_type === "pdf" ||
-    content.content_type === "presentation";
+    content.content_type === "image";
   const storagePath =
     content.storage_path && String(content.storage_path).trim();
   let signedUrl = "";
@@ -43,18 +36,6 @@ export default async function LessonViewerPage({
       signedUrl = "";
     }
   }
-
-  // For presentations: try Google Docs viewer (often more reliable than Office with proxied URLs).
-  // Staff can use the fallback link to open/download if the embed fails.
-  const baseUrl = getBaseUrl();
-  const viewToken = createContentViewToken(contentId);
-  const proxyUrl =
-    content.content_type === "presentation" && signedUrl
-      ? `${baseUrl}/api/content/view/${contentId}?t=${viewToken}`
-      : "";
-  const presentationViewerUrl = proxyUrl
-    ? `https://docs.google.com/viewer?url=${encodeURIComponent(proxyUrl)}&embedded=true`
-    : "";
 
   const currentIndex = allContent.findIndex((c) => c.id === contentId);
   const nextContent =
@@ -90,7 +71,6 @@ export default async function LessonViewerPage({
       <ContentViewer
         contentType={content.content_type}
         signedUrl={signedUrl}
-        presentationViewerUrl={presentationViewerUrl}
         contentText={content.content_text ?? null}
         contentId={contentId}
         moduleId={moduleId}

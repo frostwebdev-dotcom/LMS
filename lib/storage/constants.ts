@@ -6,7 +6,7 @@
  *
  * - moduleId: UUID of the training module (organizes files by module).
  * - uuid:     Random UUID per file (avoids collisions, no predictable paths).
- * - ext:      File extension (e.g. pdf, mp4, pptx).
+ * - ext:      File extension (e.g. pdf, mp4, png).
  *
  * Lesson records in public.training_lessons store this path in storage_path.
  * Staff view content via short-lived signed URLs generated from storage_path.
@@ -32,12 +32,12 @@ export const ALLOWED_VIDEO_EXTENSIONS = [
 
 export const ALLOWED_PDF_EXTENSIONS = ["pdf"] as const;
 
-export const ALLOWED_PRESENTATION_EXTENSIONS = ["ppt", "pptx"] as const;
+export const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp"] as const;
 
 export const ALLOWED_EXTENSIONS_BY_TYPE = {
   video: ALLOWED_VIDEO_EXTENSIONS,
   pdf: ALLOWED_PDF_EXTENSIONS,
-  presentation: ALLOWED_PRESENTATION_EXTENSIONS,
+  image: ALLOWED_IMAGE_EXTENSIONS,
 } as const;
 
 export type LessonMediaType = keyof typeof ALLOWED_EXTENSIONS_BY_TYPE;

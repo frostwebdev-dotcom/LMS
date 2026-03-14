@@ -106,7 +106,7 @@ export function ContentUploadForm({ moduleId }: ContentUploadFormProps) {
         >
           <option value="video">Video</option>
           <option value="pdf">PDF</option>
-          <option value="presentation">Presentation</option>
+          <option value="image">Image</option>
         </select>
       </div>
       <div>
@@ -118,12 +118,12 @@ export function ContentUploadForm({ moduleId }: ContentUploadFormProps) {
           name="file"
           type="file"
           required
-          accept="video/*,.pdf,.ppt,.pptx,.mp4,.webm,.mov,.avi,.mkv,.m4v"
+          accept="video/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.mov,.avi,.mkv,.m4v"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
           aria-describedby="file-hint"
         />
         <p id="file-hint" className="mt-1 text-xs text-slate-500">
-          Video: MP4, WebM, MOV, AVI, MKV, M4V. PDF or PowerPoint (PPT, PPTX). Max 100 MB.
+          Video: MP4, WebM, MOV, AVI, MKV, M4V. PDF. Image: JPG, PNG, GIF, WebP. Max 100 MB.
         </p>
       </div>
       <div>

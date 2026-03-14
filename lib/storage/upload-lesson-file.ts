@@ -56,8 +56,11 @@ export function getDefaultContentType(ext: string): string {
     avi: "video/x-msvideo",
     mkv: "video/x-matroska",
     m4v: "video/x-m4v",
-    ppt: "application/vnd.ms-powerpoint",
-    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
   };
   return map[ext] ?? "application/octet-stream";
 }

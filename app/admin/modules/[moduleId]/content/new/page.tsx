@@ -21,7 +21,7 @@ export default async function NewContentPage({
         ← Back to module
       </Link>
       <h1 className="text-2xl font-bold text-slate-800">Add lesson</h1>
-      <p className="text-slate-600">Upload a video, PDF, or presentation. Order determines display order in the module.</p>
+      <p className="text-slate-600">Upload a video, PDF, or image. Order determines display order in the module.</p>
       <ContentUploadForm moduleId={moduleId} />
     </div>
   );
