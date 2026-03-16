@@ -1,7 +1,8 @@
 import { requireAdminOrRedirect } from "@/lib/auth/get-session";
 import { getAllProfilesWithRoles, getRoles } from "@/services/admin-users-service";
-import { createUserAction, updateUserRoleAction } from "@/app/actions/admin-users";
+import { createUserAction } from "@/app/actions/admin-users";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
+import { UpdateRoleForm } from "@/components/admin/UpdateRoleForm";
 import { UserManagementForm } from "@/components/admin/UserManagementForm";
 
 export default async function AdminUsersPage() {
@@ -70,28 +71,11 @@ export default async function AdminUsersPage() {
                       {profile.full_name ?? "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <form
-                        action={updateUserRoleAction.bind(null, profile.id)}
-                        className="inline-flex items-center gap-2"
-                      >
-                        <select
-                          name="roleId"
-                          defaultValue={profile.role_id}
-                          className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                        >
-                          {roles.map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.name === "admin" ? "Administrator" : "Staff"}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="submit"
-                          className="text-sm text-primary-600 hover:underline"
-                        >
-                          Update
-                        </button>
-                      </form>
+                      <UpdateRoleForm
+                        profileId={profile.id}
+                        currentRoleId={profile.role_id}
+                        roles={roles}
+                      />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <DeleteUserButton userId={profile.id} userEmail={profile.email} />
