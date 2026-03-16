@@ -13,7 +13,12 @@ export async function submitQuizAction(
   _prev: unknown,
   formData: FormData
 ): Promise<QuizSubmitResult> {
-  const user = await requireSessionUser();
+  let user;
+  try {
+    user = await requireSessionUser();
+  } catch {
+    return { success: false, error: "Please sign in again." };
+  }
   const quizId = formData.get("quiz_id");
   const answersJson = formData.get("answers");
   if (typeof quizId !== "string" || typeof answersJson !== "string") {

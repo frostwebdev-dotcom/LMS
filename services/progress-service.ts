@@ -76,7 +76,7 @@ export async function getModuleProgressCompletedAt(
     .select("completed_at")
     .eq("user_id", userId)
     .eq("module_id", moduleId)
-    .single();
+    .maybeSingle();
   return data?.completed_at ?? null;
 }
 
@@ -92,6 +92,6 @@ export async function getQuizBestAttempt(
     .eq("quiz_id", quizId)
     .order("score_percent", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
   return data;
 }

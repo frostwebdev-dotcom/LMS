@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth/get-session";
+import { requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { getContentById, getContentByModuleId, getSignedUrl } from "@/services/content-service";
 import { ContentViewer } from "@/components/content/ContentViewer";
@@ -11,8 +11,7 @@ export default async function LessonViewerPage({
   params: Promise<{ moduleId: string; contentId: string }>;
 }) {
   const { moduleId, contentId } = await params;
-  const user = await getSessionUser();
-  if (!user) notFound();
+  await requireUserOrRedirect();
 
   const [module, content, allContent] = await Promise.all([
     getModuleForStaff(moduleId),

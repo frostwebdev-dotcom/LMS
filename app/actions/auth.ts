@@ -74,7 +74,7 @@ export async function signUp(formData: FormData): Promise<AuthActionResult> {
     email: formData.get("email") ?? "",
     password: formData.get("password") ?? "",
     fullName: formData.get("fullName") ?? undefined,
-    role: formData.get("role") === "admin" ? "admin" : "staff",
+    role: "staff", // Ignore client-supplied role; only staff can self-signup. Admins assigned via dashboard.
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
@@ -98,7 +98,7 @@ export async function signUp(formData: FormData): Promise<AuthActionResult> {
       options: {
         data: {
           full_name: parsed.data.fullName,
-          role: parsed.data.role ?? "staff",
+          role: "staff",
         },
       },
     });

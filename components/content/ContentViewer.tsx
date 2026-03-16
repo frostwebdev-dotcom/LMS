@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { markLessonCompleteAction } from "@/app/actions/lesson-progress";
 import type { ContentType } from "@/types/database";
 
@@ -27,10 +27,16 @@ export function ContentViewer({
   nextHref,
 }: ContentViewerProps) {
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const handleMarkComplete = () => {
+    setError(null);
     startTransition(async () => {
-      await markLessonCompleteAction(contentId);
+      try {
+        await markLessonCompleteAction(contentId);
+      } catch {
+        setError("Could not save. Sign in again if needed.");
+      }
     });
   };
 
@@ -85,14 +91,21 @@ export function ContentViewer({
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <button
-          type="button"
-          onClick={handleMarkComplete}
-          disabled={isPending}
+        <div className="flex flex-col gap-2">
+          {error && (
+            <p className="text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleMarkComplete}
+            disabled={isPending}
           className="order-2 sm:order-1 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition"
         >
-          {isPending ? "Saving…" : "Mark as complete"}
-        </button>
+            {isPending ? "Saving…" : "Mark as complete"}
+          </button>
+        </div>
         <nav className="flex gap-2 order-1 sm:order-2" aria-label="Lesson navigation">
           {prevHref && (
             <Link

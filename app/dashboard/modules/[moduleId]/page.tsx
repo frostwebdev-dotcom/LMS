@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth/get-session";
+import { requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { getContentByModuleId } from "@/services/content-service";
 import { getQuizByModuleId } from "@/services/quiz-service";
@@ -21,8 +21,7 @@ export default async function ModuleDetailPage({
   params: Promise<{ moduleId: string }>;
 }) {
   const { moduleId } = await params;
-  const user = await getSessionUser();
-  if (!user) notFound();
+  const user = await requireUserOrRedirect();
 
   const [module, content, quiz] = await Promise.all([
     getModuleForStaff(moduleId),
