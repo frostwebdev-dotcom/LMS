@@ -24,6 +24,9 @@ export default async function AdminLayout({
             <Link href="/admin/progress" className="text-sm text-slate-600 hover:text-slate-900">
               Staff progress
             </Link>
+            <Link href="/admin/users" className="text-sm text-slate-600 hover:text-slate-900">
+              Users
+            </Link>
             <Link href={STAFF_ROUTE_PREFIX} className="text-sm text-primary-600 hover:underline">
               Staff view
             </Link>
