@@ -1,6 +1,6 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { getStaffProgress, getStaffProgressFilterOptions } from "@/services/admin-progress-service";
-import { ResetModuleProgressForm } from "@/components/admin/ResetModuleProgressForm";
 import { ProgressFilters } from "@/components/admin/ProgressFilters";
 import { ProgressReviewTable } from "@/components/admin/ProgressReviewTable";
 
@@ -36,27 +36,13 @@ export default async function AdminProgressPage({ searchParams }: PageProps) {
         />
       </Suspense>
 
-      {filterOptions.modules.length > 0 && (
-        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold text-slate-800 mb-2">
-            Reset training (e.g. annual)
-          </h2>
-          <p className="text-sm text-slate-600 mb-3">
-            Clear all staff progress for a module so everyone must re-complete it.
-          </p>
-          <ul className="flex flex-wrap gap-2">
-            {filterOptions.modules.map((m) => (
-              <li key={m.id}>
-                <ResetModuleProgressForm
-                  moduleId={m.id}
-                  moduleTitle={m.title}
-                  compact
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <p className="text-sm text-slate-600">
+        To reset all staff progress for a module (e.g. annual re-training), open that module under{" "}
+        <Link href="/admin/modules" className="font-medium text-primary-600 hover:text-primary-700 hover:underline">
+          Modules
+        </Link>
+        {" "}and use the <strong>Reset training</strong> option there.
+      </p>
 
       <section>
         <h2 className="sr-only">Progress results</h2>

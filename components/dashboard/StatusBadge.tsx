@@ -11,11 +11,11 @@ const config: Record<
 > = {
   not_started: {
     label: "Not started",
-    className: "bg-slate-100 text-slate-700",
+    className: "bg-primary-100 text-primary-700",
   },
   in_progress: {
     label: "In progress",
-    className: "bg-amber-100 text-amber-800",
+    className: "bg-accent-100 text-accent-800",
   },
   completed: {
     label: "Completed",

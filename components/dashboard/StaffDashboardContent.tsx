@@ -8,8 +8,8 @@ interface StaffDashboardContentProps {
 export function StaffDashboardContent({ modules }: StaffDashboardContentProps) {
   if (modules.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center sm:p-10">
-        <p className="text-slate-600">
+      <div className="rounded-xl border border-primary-200 bg-white p-8 text-center sm:p-10">
+        <p className="text-primary-700">
           No training modules available yet. Check back later or contact your
           administrator.
         </p>

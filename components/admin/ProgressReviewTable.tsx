@@ -1,6 +1,5 @@
 import type { StaffProgressRow } from "@/services/admin-progress-service";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { ResetUserProgressForm } from "@/components/admin/ResetUserProgressForm";
 import type { ModuleProgressStatus } from "@/types/dashboard";
 
 interface ProgressReviewTableProps {
@@ -34,7 +33,6 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
               <th className="px-4 py-3 font-medium text-slate-800">Progress</th>
               <th className="px-4 py-3 font-medium text-slate-800">Quiz score</th>
               <th className="px-4 py-3 font-medium text-slate-800">Status</th>
-              <th className="px-4 py-3 font-medium text-slate-800">Reset</th>
             </tr>
           </thead>
           <tbody>
@@ -61,14 +59,6 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={completionStatus(row)} />
-                </td>
-                <td className="px-4 py-3">
-                  <ResetUserProgressForm
-                    userId={row.user_id}
-                    moduleId={row.module_id}
-                    moduleTitle={row.module_title}
-                    userName={row.full_name ?? row.email}
-                  />
                 </td>
               </tr>
             ))}
@@ -105,14 +95,6 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
                   )}
                 </dd>
               </dl>
-              <div className="mt-3 pt-3 border-t border-slate-100">
-                <ResetUserProgressForm
-                  userId={row.user_id}
-                  moduleId={row.module_id}
-                  moduleTitle={row.module_title}
-                  userName={row.full_name ?? row.email}
-                />
-              </div>
             </div>
           </li>
         ))}

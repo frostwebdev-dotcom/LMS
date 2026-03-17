@@ -12,6 +12,7 @@ import {
 import { LessonList } from "@/components/content/LessonList";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import type { ModuleContent } from "@/types/database";
 import type { ModuleProgressStatus } from "@/types/dashboard";
 
@@ -77,55 +78,46 @@ export default async function ModuleDetailPage({
         )}
       </header>
 
-      <section
-        aria-labelledby="module-progress-heading"
-        className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <h2 id="module-progress-heading" className="text-sm font-semibold text-slate-700">
-            Your progress
-          </h2>
-          <StatusBadge status={status} />
-        </div>
-        <ProgressBar
-          value={progressPercent}
-          label={`${progressPercent}% complete`}
-          aria-label={`Module progress: ${progressPercent}%`}
-        />
-      </section>
+      <Accordion>
+        <AccordionItem title="Your progress" defaultExpanded id="module-progress">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <span className="text-sm font-medium text-primary-700">Progress</span>
+            <StatusBadge status={status} />
+          </div>
+          <ProgressBar
+            value={progressPercent}
+            label={`${progressPercent}% complete`}
+            aria-label={`Module progress: ${progressPercent}%`}
+          />
+        </AccordionItem>
 
-      <section aria-labelledby="lessons-heading">
-        <h2 id="lessons-heading" className="text-lg font-semibold text-slate-900 mb-3 sm:mb-4">
-          Lessons
-        </h2>
-        <LessonList moduleId={moduleId} lessons={lessonsWithState} />
-      </section>
+        <AccordionItem title="Lessons" defaultExpanded id="lessons">
+          <LessonList moduleId={moduleId} lessons={lessonsWithState} headingId="lessons-trigger" />
+        </AccordionItem>
 
-      {quiz && (
-        <section aria-labelledby="quiz-heading">
-          <h2 id="quiz-heading" className="text-lg font-semibold text-slate-900 mb-3 sm:mb-4">
-            Quiz
-          </h2>
-          <Link
-            href={`/dashboard/modules/${moduleId}/quiz`}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-primary-200 hover:bg-slate-50 sm:px-5"
-          >
-            <span className="font-medium text-slate-900">{quiz.title}</span>
-            {quizAttempt ? (
-              <span className="text-sm text-slate-600 shrink-0">
-                <strong>{quizAttempt.score_percent}%</strong>
-                {quizAttempt.passed ? (
-                  <span className="text-emerald-700"> — Passed</span>
-                ) : (
-                  <span className="text-amber-700"> — Not passed</span>
-                )}
-              </span>
-            ) : (
-              <span className="text-sm text-slate-500 shrink-0">Not attempted</span>
-            )}
-          </Link>
-        </section>
-      )}
+        {quiz && (
+          <AccordionItem title="Quiz" defaultExpanded id="quiz">
+            <Link
+              href={`/dashboard/modules/${moduleId}/quiz`}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary-200 bg-white px-4 py-3 transition hover:border-primary-300 hover:bg-primary-50/50 sm:px-5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              <span className="font-medium text-primary-900">{quiz.title}</span>
+              {quizAttempt ? (
+                <span className="text-sm text-primary-600 shrink-0">
+                  <strong>{quizAttempt.score_percent}%</strong>
+                  {quizAttempt.passed ? (
+                    <span className="text-emerald-700"> — Passed</span>
+                  ) : (
+                    <span className="text-accent-700"> — Not passed</span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-sm text-primary-500 shrink-0">Not attempted</span>
+              )}
+            </Link>
+          </AccordionItem>
+        )}
+      </Accordion>
 
       {content.length === 0 && !quiz && (
         <p className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-600">

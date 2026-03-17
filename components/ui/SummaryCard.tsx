@@ -19,20 +19,20 @@ export function SummaryCard({
 }: SummaryCardProps) {
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6 ${className}`}
+      className={`rounded-xl border border-primary-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6 ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 sm:text-3xl">
+          <p className="text-sm font-medium text-primary-600">{title}</p>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-primary-900 sm:text-3xl">
             {value}
           </p>
           {subtitle != null && (
-            <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-primary-600">{subtitle}</p>
           )}
         </div>
         {icon != null && (
-          <div className="flex-shrink-0 text-slate-400" aria-hidden>
+          <div className="flex-shrink-0 text-primary-400" aria-hidden>
             {icon}
           </div>
         )}

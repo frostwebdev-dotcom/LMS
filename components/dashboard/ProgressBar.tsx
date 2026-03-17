@@ -26,7 +26,7 @@ export function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={ariaLabel ?? (label ? undefined : "Progress")}
-        className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+        className="h-2 w-full overflow-hidden rounded-full bg-primary-200"
       >
         <div
           className="h-full rounded-full bg-primary-600 transition-[width] duration-300 ease-out"
@@ -34,7 +34,7 @@ export function ProgressBar({
         />
       </div>
       {label != null && (
-        <span className="mt-1 block text-xs font-medium text-slate-500">
+        <span className="mt-1 block text-xs font-medium text-primary-600">
           {label}
         </span>
       )}

@@ -11,11 +11,11 @@ export function Button({
   className = "",
   ...props
 }: ButtonProps) {
-  const base = "rounded-lg font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const base = "rounded-lg font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50";
   const variants = {
     primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500",
-    secondary: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-400",
-    ghost: "text-slate-700 hover:bg-slate-100 focus:ring-slate-400",
+    secondary: "border border-primary-200 bg-white text-primary-800 hover:bg-primary-50 focus:ring-primary-400",
+    ghost: "text-primary-700 hover:bg-primary-50 focus:ring-primary-400",
   };
   const sizes = {
     sm: "px-3 py-1.5 text-sm",

@@ -14,10 +14,10 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold text-primary-900 sm:text-3xl">
           Admin dashboard
         </h1>
-        <p className="mt-1 text-slate-600 sm:mt-2">
+        <p className="mt-1 text-primary-700 sm:mt-2">
           Manage training modules, content, quizzes, and view staff progress.
         </p>
       </header>
@@ -27,7 +27,7 @@ export default async function AdminDashboardPage() {
       {/* Extensible: add more sections below (e.g. recent activity, quick actions) */}
       <section aria-labelledby="modules-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 id="modules-heading" className="text-lg font-semibold text-slate-900">
+          <h2 id="modules-heading" className="text-lg font-semibold text-primary-900">
             Modules
           </h2>
           <Link
@@ -38,7 +38,7 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
         {modules.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-600">
+          <div className="mt-4 rounded-xl border border-primary-200 bg-white p-6 text-center text-primary-700">
             No modules yet. Create one to get started.
           </div>
         ) : (
@@ -47,10 +47,10 @@ export default async function AdminDashboardPage() {
               <li key={m.id}>
                 <Link
                   href={`/admin/modules/${m.id}`}
-                  className="block rounded-lg border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  className="block rounded-lg border border-primary-200 bg-white px-4 py-3 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  <span className="font-medium text-slate-900">{m.title}</span>
-                  <span className="ml-2 text-sm text-slate-500">
+                  <span className="font-medium text-primary-900">{m.title}</span>
+                  <span className="ml-2 text-sm text-primary-600">
                     {m.is_published ? "Published" : "Draft"}
                   </span>
                 </Link>

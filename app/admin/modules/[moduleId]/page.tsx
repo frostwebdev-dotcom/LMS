@@ -44,9 +44,9 @@ export default async function AdminModuleDetailPage({
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-800 mb-3">Reset training</h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-3">Reset training for this module</h2>
         <p className="text-sm text-slate-600 mb-2">
-          Clear all staff progress for this module (e.g. for annual re-training). Staff will need to re-complete lessons and re-take the quiz.
+          Clear all staff progress for this module (e.g. annual re-training). Everyone will need to re-complete lessons and re-take the quiz. This cannot be undone.
         </p>
         <ResetModuleProgressForm
           moduleId={moduleId}
