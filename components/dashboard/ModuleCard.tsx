@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { StaffDashboardModule } from "@/types/dashboard";
+import { formatModuleCompletedAt, formatExpirationDate } from "@/lib/format-completion-date";
 import { ProgressBar } from "./ProgressBar";
 import { StatusBadge } from "./StatusBadge";
+import { ExpirationBadge } from "./ExpirationBadge";
 import { DurationDisplay } from "./DurationDisplay";
 
 interface ModuleCardProps {
@@ -32,6 +34,23 @@ export function ModuleCard({ module }: ModuleCardProps) {
             label={`${module.progressPercent}% complete`}
             aria-label={`Module progress: ${module.progressPercent}%`}
           />
+          {module.status === "completed" && module.progressCompletedAt && (
+            <div className="space-y-1.5">
+              <p className="text-xs text-primary-600" title={module.progressCompletedAt}>
+                Completed {formatModuleCompletedAt(module.progressCompletedAt)}
+              </p>
+              {module.expiration && (
+                <>
+                  <p className="text-xs text-primary-600">
+                    {module.expiration.status === "expired"
+                      ? `Expired ${formatExpirationDate(module.expiration.expiresAt)}`
+                      : `Expires ${formatExpirationDate(module.expiration.expiresAt)}`}
+                  </p>
+                  <ExpirationBadge status={module.expiration.status} daysRemaining={module.expiration.daysRemaining} />
+                </>
+              )}
+            </div>
+          )}
           {module.quizCount > 0 && (
             <p className="text-xs text-primary-700">
               {module.quizResult ? (

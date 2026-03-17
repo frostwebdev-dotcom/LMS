@@ -39,6 +39,7 @@ export default async function AdminModuleDetailPage({
           initialDescription={trainingModule.description}
           initialSortOrder={trainingModule.sort_order}
           initialPublished={trainingModule.is_published}
+          initialExpirationMonths={trainingModule.expiration_months ?? null}
         />
         <ModuleDeleteForm moduleId={moduleId} />
       </section>

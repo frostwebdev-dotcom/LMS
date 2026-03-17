@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import type { ExpirationStatus } from "@/types/dashboard";
+import { computeExpiration } from "@/lib/expiration";
 
 export interface StaffProgressRow {
   user_id: string;
@@ -16,6 +18,12 @@ export interface StaffProgressRow {
   content_total_count: number;
   /** Whether this module has a quiz (affects progress calculation). */
   has_quiz: boolean;
+  /** Expiration: valid, expiring_soon, expired. Set when completed; null otherwise. */
+  expiration_status: ExpirationStatus | null;
+  /** Days remaining (negative = days since expired). Set when completed; null otherwise. */
+  expiration_days_remaining: number | null;
+  /** ISO date when training expires. Set when completed; null otherwise. */
+  expiration_expires_at: string | null;
 }
 
 export interface StaffProgressFilters {
@@ -49,7 +57,7 @@ export async function getStaffProgress(
 
   const { data: modules } = await supabase
     .from("training_modules")
-    .select("id, title")
+    .select("id, title, expiration_months")
     .eq("is_published", true)
     .order("sort_order", { ascending: true });
   if (!modules?.length) return [];
@@ -134,7 +142,9 @@ export async function getStaffProgress(
     for (const mod of modulesFiltered) {
       const modId = mod.id;
       const modTitle = mod.title;
+      const expirationMonths = (mod as { expiration_months?: number | null }).expiration_months;
       const completedAt = moduleProgressMap.get(`${profile.id}:${modId}`) ?? null;
+      const expiration = computeExpiration(completedAt, expirationMonths);
       const contentTotal = contentByModuleCount.get(modId) ?? 0;
       const contentIds = contentIdsByModuleList.get(modId) ?? [];
       let contentCompleted = 0;
@@ -161,6 +171,9 @@ export async function getStaffProgress(
         content_completed_count: contentCompleted,
         content_total_count: contentTotal,
         has_quiz: hasQuiz,
+        expiration_status: expiration?.status ?? null,
+        expiration_days_remaining: expiration?.daysRemaining ?? null,
+        expiration_expires_at: expiration?.expiresAt ?? null,
       });
     }
   }

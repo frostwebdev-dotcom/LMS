@@ -4,6 +4,7 @@ export const createModuleSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(2000).optional().nullable(),
   sort_order: z.number().int().min(0).optional(),
+  expiration_months: z.number().int().min(1).max(120).optional().nullable(),
 });
 
 export const updateModuleSchema = createModuleSchema.extend({

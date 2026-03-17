@@ -1,6 +1,7 @@
 import { requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getStaffDashboardModules } from "@/services/staff-dashboard-service";
 import { StaffDashboardContent } from "@/components/dashboard/StaffDashboardContent";
+import { StaffComplianceSummary } from "@/components/dashboard/StaffComplianceSummary";
 
 export default async function DashboardPage() {
   const user = await requireUserOrRedirect();
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
           Browse your assigned modules. Complete lessons and quizzes to track your progress.
         </p>
       </header>
+      <StaffComplianceSummary modules={modules} />
       <StaffDashboardContent modules={modules} />
     </div>
   );

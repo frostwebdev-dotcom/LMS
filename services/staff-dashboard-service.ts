@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { computeExpiration } from "@/lib/expiration";
 import type {
   StaffDashboardModule,
   ModuleProgressStatus,
@@ -18,7 +19,7 @@ export async function getStaffDashboardModules(
 
   const { data: modules, error: modError } = await supabase
     .from("training_modules")
-    .select("id, title, description, sort_order, estimated_duration_minutes")
+    .select("id, title, description, sort_order, estimated_duration_minutes, expiration_months")
     .eq("is_published", true)
     .order("sort_order", { ascending: true });
 
@@ -77,6 +78,9 @@ export async function getStaffDashboardModules(
         ? dbDuration
         : contentCount * 5 + (quizCount ? 10 : 0);
 
+    const expirationMonths = (m as { expiration_months?: number | null }).expiration_months;
+    const expiration = computeExpiration(progressCompletedAt, expirationMonths);
+
     return {
       id: m.id,
       title: m.title,
@@ -87,6 +91,7 @@ export async function getStaffDashboardModules(
       contentCount,
       quizCount,
       progressCompletedAt,
+      expiration,
       quizResult,
     };
   });

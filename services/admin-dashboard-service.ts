@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AdminDashboardStats } from "@/types/admin-dashboard";
+import type { AdminDashboardStats, ComplianceCounts } from "@/types/admin-dashboard";
+import { computeExpiration } from "@/lib/expiration";
 
 /**
  * Fetches admin dashboard summary stats from Supabase. No mock data.
@@ -7,16 +8,18 @@ import type { AdminDashboardStats } from "@/types/admin-dashboard";
  * - totalModules: all training modules
  * - completedModules: total user-module completions (user_module_progress with completed_at)
  * - inProgressTraining: (staff, published module) pairs with some progress but not completed
+ * - compliance: counts of completed trainings by status (valid, expiring soon, expired)
  */
 export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
   const supabase = await createClient();
 
-  const [staffRole, modulesResult, progressResult, inProgressCount] =
+  const [staffRole, modulesResult, progressResult, inProgressCount, compliance] =
     await Promise.all([
       getStaffCount(supabase),
       getModuleCount(supabase),
       getCompletedModuleCount(supabase),
       getInProgressTrainingCount(supabase),
+      getComplianceCounts(supabase),
     ]);
 
   return {
@@ -24,7 +27,39 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
     totalModules: modulesResult,
     completedModules: progressResult,
     inProgressTraining: inProgressCount,
+    compliance,
   };
+}
+
+async function getComplianceCounts(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<ComplianceCounts> {
+  const { data: rows } = await supabase
+    .from("user_module_progress")
+    .select("module_id, completed_at")
+    .not("completed_at", "is", null);
+  if (!rows?.length) return { valid: 0, expiringSoon: 0, expired: 0 };
+
+  const moduleIds = [...new Set((rows as { module_id: string }[]).map((r) => r.module_id))];
+  const { data: modules } = await supabase
+    .from("training_modules")
+    .select("id, expiration_months")
+    .in("id", moduleIds);
+  const expirationByModule = new Map(
+    (modules ?? []).map((m) => [m.id, (m as { expiration_months?: number | null }).expiration_months])
+  );
+
+  let valid = 0;
+  let expiringSoon = 0;
+  let expired = 0;
+  for (const row of rows as { module_id: string; completed_at: string }[]) {
+    const exp = computeExpiration(row.completed_at, expirationByModule.get(row.module_id));
+    if (!exp) continue;
+    if (exp.status === "valid") valid++;
+    else if (exp.status === "expiring_soon") expiringSoon++;
+    else expired++;
+  }
+  return { valid, expiringSoon, expired };
 }
 
 async function getStaffCount(

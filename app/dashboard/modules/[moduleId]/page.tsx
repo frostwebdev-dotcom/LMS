@@ -9,6 +9,9 @@ import {
   getQuizBestAttempt,
   getModuleProgressCompletedAt,
 } from "@/services/progress-service";
+import { formatModuleCompletedAt, formatExpirationDate } from "@/lib/format-completion-date";
+import { computeExpiration } from "@/lib/expiration";
+import { ExpirationBadge } from "@/components/dashboard/ExpirationBadge";
 import { LessonList } from "@/components/content/LessonList";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
@@ -57,6 +60,8 @@ export default async function ModuleDetailPage({
         ? "in_progress"
         : "not_started";
 
+  const expiration = computeExpiration(progressCompletedAt, module.expiration_months);
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <nav className="flex items-center gap-2 text-sm">
@@ -89,6 +94,25 @@ export default async function ModuleDetailPage({
             label={`${progressPercent}% complete`}
             aria-label={`Module progress: ${progressPercent}%`}
           />
+          {status === "completed" && progressCompletedAt && (
+            <div className="mt-3 space-y-2">
+              <p className="text-sm text-primary-700" title={progressCompletedAt}>
+                Completed on {formatModuleCompletedAt(progressCompletedAt)}
+              </p>
+              {expiration && (
+                <>
+                  <p className="text-sm text-primary-700">
+                    {expiration.status === "expired"
+                      ? `Expired ${formatExpirationDate(expiration.expiresAt)}`
+                      : `Expires ${formatExpirationDate(expiration.expiresAt)}`}
+                    {" · "}
+                    <span className="font-medium">{expiration.daysRemaining >= 0 ? `${expiration.daysRemaining} days remaining` : `Expired ${Math.abs(expiration.daysRemaining)} days ago`}</span>
+                  </p>
+                  <ExpirationBadge status={expiration.status} daysRemaining={expiration.daysRemaining} />
+                </>
+              )}
+            </div>
+          )}
         </AccordionItem>
 
         <AccordionItem title="Lessons" defaultExpanded id="lessons">

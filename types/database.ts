@@ -20,6 +20,8 @@ export interface TrainingModule {
   description: string | null;
   sort_order: number;
   is_published: boolean;
+  /** Months after completion until training expires. Null = use default (12). */
+  expiration_months?: number | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

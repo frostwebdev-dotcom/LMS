@@ -1,5 +1,7 @@
 import type { StaffProgressRow } from "@/services/admin-progress-service";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { ExpirationBadge } from "@/components/dashboard/ExpirationBadge";
+import { formatCompletionDateTime, formatExpirationDate } from "@/lib/format-completion-date";
 import type { ModuleProgressStatus } from "@/types/dashboard";
 
 interface ProgressReviewTableProps {
@@ -33,6 +35,8 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
               <th className="px-4 py-3 font-medium text-slate-800">Progress</th>
               <th className="px-4 py-3 font-medium text-slate-800">Quiz score</th>
               <th className="px-4 py-3 font-medium text-slate-800">Status</th>
+              <th className="px-4 py-3 font-medium text-slate-800">Completed</th>
+              <th className="px-4 py-3 font-medium text-slate-800">Expiration</th>
             </tr>
           </thead>
           <tbody>
@@ -59,6 +63,22 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={completionStatus(row)} />
+                </td>
+                <td className="px-4 py-3 text-slate-600 whitespace-nowrap" title={row.module_completed_at ?? undefined}>
+                  {row.module_completed_at ? formatCompletionDateTime(row.module_completed_at) : "—"}
+                </td>
+                <td className="px-4 py-3">
+                  {row.expiration_status != null && row.expiration_days_remaining != null && row.expiration_expires_at ? (
+                    <div className="flex flex-col gap-1">
+                      <ExpirationBadge status={row.expiration_status} daysRemaining={row.expiration_days_remaining} />
+                      <span className="text-xs text-slate-600">
+                        {row.expiration_status === "expired" ? "Expired " : "Expires "}
+                        {formatExpirationDate(row.expiration_expires_at)}
+                      </span>
+                    </div>
+                  ) : (
+                    "—"
+                  )}
                 </td>
               </tr>
             ))}
@@ -90,6 +110,24 @@ export function ProgressReviewTable({ rows }: ProgressReviewTableProps) {
                       {row.quiz_best_score}%
                       {row.quiz_passed ? " ✓" : " (not passed)"}
                     </>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+                <dt className="text-slate-500">Completed</dt>
+                <dd className="text-slate-900">
+                  {row.module_completed_at ? formatCompletionDateTime(row.module_completed_at) : "—"}
+                </dd>
+                <dt className="text-slate-500">Expiration</dt>
+                <dd className="text-slate-900">
+                  {row.expiration_status != null && row.expiration_days_remaining != null && row.expiration_expires_at ? (
+                    <div className="flex flex-col gap-1">
+                      <ExpirationBadge status={row.expiration_status} daysRemaining={row.expiration_days_remaining} />
+                      <span className="text-xs">
+                        {row.expiration_status === "expired" ? "Expired " : "Expires "}
+                        {formatExpirationDate(row.expiration_expires_at)}
+                      </span>
+                    </div>
                   ) : (
                     "—"
                   )}

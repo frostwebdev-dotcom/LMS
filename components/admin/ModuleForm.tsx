@@ -11,6 +11,8 @@ interface ModuleFormProps {
   initialDescription?: string | null;
   initialSortOrder?: number;
   initialPublished?: boolean;
+  /** Months after completion until training expires. Default 12 (annual). */
+  initialExpirationMonths?: number | null;
   moduleId?: string;
 }
 
@@ -19,6 +21,7 @@ export function ModuleForm({
   initialDescription = null,
   initialSortOrder = 0,
   initialPublished = false,
+  initialExpirationMonths = null,
   moduleId,
 }: ModuleFormProps) {
   const router = useRouter();
@@ -82,6 +85,24 @@ export function ModuleForm({
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
         />
       </div>
+      {isEdit && (
+        <div>
+          <label htmlFor="expiration_months" className="block text-sm font-medium text-slate-700 mb-1">
+            Expiration (months after completion)
+          </label>
+          <input
+            id="expiration_months"
+            name="expiration_months"
+            type="number"
+            min={1}
+            max={120}
+            placeholder="12"
+            defaultValue={initialExpirationMonths ?? ""}
+            className="w-full max-w-[8rem] rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+          />
+          <p className="mt-1 text-xs text-slate-500">Default 12 (annual). Leave empty for 12 months.</p>
+        </div>
+      )}
       {isEdit && (
         <div className="flex items-center gap-2">
           <input

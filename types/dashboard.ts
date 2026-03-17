@@ -5,6 +5,16 @@
 
 export type ModuleProgressStatus = "not_started" | "in_progress" | "completed";
 
+/** Training expiration status for completed modules. */
+export type ExpirationStatus = "valid" | "expiring_soon" | "expired";
+
+/** Expiration details when module is completed. */
+export interface ModuleExpiration {
+  expiresAt: string;
+  daysRemaining: number;
+  status: ExpirationStatus;
+}
+
 /** Quiz result for a module (when module has a quiz). null = no quiz or not attempted. */
 export interface ModuleQuizResult {
   bestScorePercent: number;
@@ -22,6 +32,8 @@ export interface StaffDashboardModule {
   contentCount: number;
   quizCount: number;
   progressCompletedAt: string | null;
+  /** Expiration (date, days remaining, status). Set when completed; null otherwise. */
+  expiration: ModuleExpiration | null;
   /** Best quiz score and pass status. null when module has no quiz or user has not attempted. */
   quizResult: ModuleQuizResult | null;
 }

@@ -16,22 +16,24 @@ export async function createModuleAction(
   formData: FormData
 ): Promise<ModuleActionResult> {
   await requireAdmin();
+  const rawSort = formData.get("sort_order");
+  const rawExp = formData.get("expiration_months");
   const parsed = createModuleSchema.safeParse({
     title: formData.get("title") ?? "",
     description: formData.get("description") || null,
-    sort_order: formData.get("sort_order") ? Number(formData.get("sort_order")) : 0,
+    sort_order: rawSort ? Number(rawSort) : 0,
+    expiration_months: rawExp === "" || rawExp === null ? null : rawExp ? Number(rawExp) : undefined,
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };
   }
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
+  const insertPayload = { ...parsed.data, created_by: user.user?.id ?? null };
+  if (insertPayload.expiration_months === undefined) delete (insertPayload as Record<string, unknown>).expiration_months;
   const { data, error } = await supabase
     .from("training_modules")
-    .insert({
-      ...parsed.data,
-      created_by: user.user?.id ?? null,
-    })
+    .insert(insertPayload)
     .select("id")
     .single();
   if (error) return { success: false, error: toUserFriendlyError(error.message) };
@@ -46,19 +48,23 @@ export async function updateModuleAction(
   formData: FormData
 ): Promise<ModuleActionResult> {
   await requireAdmin();
+  const rawExp = formData.get("expiration_months");
   const parsed = updateModuleSchema.safeParse({
     title: formData.get("title") ?? "",
     description: formData.get("description") || null,
     sort_order: formData.get("sort_order") ? Number(formData.get("sort_order")) : undefined,
     is_published: formData.get("is_published") === "on" || formData.get("is_published") === "true",
+    expiration_months: rawExp === "" || rawExp === null ? null : rawExp ? Number(rawExp) : undefined,
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };
   }
   const supabase = await createClient();
+  const updatePayload = { ...parsed.data };
+  if (updatePayload.expiration_months === undefined) delete (updatePayload as Record<string, unknown>).expiration_months;
   const { error } = await supabase
     .from("training_modules")
-    .update(parsed.data)
+    .update(updatePayload)
     .eq("id", moduleId);
   if (error) return { success: false, error: toUserFriendlyError(error.message) };
   revalidatePath("/admin");
