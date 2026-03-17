@@ -29,19 +29,17 @@ export function Logo({ href, height = 40, className = "" }: LogoProps) {
     return (
       <Link
         href={href}
-        className={`inline-flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded ${className}`}
+        className={`inline-flex items-center focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded ${className}`}
         aria-label={`${BRAND_NAME} home`}
       >
         {img}
-        <span className="font-semibold text-primary-800 text-lg hidden sm:inline">{BRAND_NAME}</span>
       </Link>
     );
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
+    <div className={`inline-flex items-center ${className}`}>
       {img}
-      <span className="font-semibold text-primary-800 text-lg hidden sm:inline">{BRAND_NAME}</span>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   AUTH_LOGIN_PATH,
+  AUTH_RESET_PASSWORD_PATH,
   ADMIN_ROUTE_PREFIX,
   isAuthPath,
   isProtectedPath,
@@ -80,7 +81,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isAuthPath(pathname) || pathname === "/") {
+  // Allow authenticated users to load /reset-password so the client can process
+  // the recovery hash (tokens are in the fragment, not sent to the server).
+  const authPathRedirect =
+    pathname === "/" ||
+    (isAuthPath(pathname) && pathname !== AUTH_RESET_PASSWORD_PATH);
+  if (authPathRedirect) {
     const redirectTo = request.nextUrl.searchParams.get("redirect");
     const target = resolveRoleRedirect(role, redirectTo);
     const url = request.nextUrl.clone();

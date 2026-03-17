@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isAdmin, requireUserOrRedirect } from "@/lib/auth/get-session";
 import { signOut } from "@/app/actions/auth";
-import { ADMIN_ROUTE_PREFIX } from "@/lib/auth/config";
+import { ACCOUNT_PATH, ADMIN_ROUTE_PREFIX } from "@/lib/auth/config";
 import { Logo } from "@/components/layout/Logo";
 
 export default async function DashboardLayout({
@@ -14,12 +14,18 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-primary-50/30">
       <header className="border-b border-primary-200 bg-white shadow-sm">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3 px-4 sm:px-6">
           <Logo href="/dashboard" height={36} />
-          <nav className="flex items-center gap-3 sm:gap-4" aria-label="User menu">
+          <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4" aria-label="User menu">
             <span className="text-sm text-primary-800 truncate max-w-[140px] sm:max-w-none">
               {user.fullName ?? user.email}
             </span>
+            <Link
+              href={ACCOUNT_PATH}
+              className="text-sm text-primary-600 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded px-2 py-1"
+            >
+              Account
+            </Link>
             {isAdmin(user) && (
               <Link
                 href={ADMIN_ROUTE_PREFIX}

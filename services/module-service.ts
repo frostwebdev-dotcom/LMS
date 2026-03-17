@@ -12,7 +12,6 @@ export async function getPublishedModules(userId: string): Promise<ModuleWithPro
   const { data: modules, error: modError } = await supabase
     .from("training_modules")
     .select("*")
-    .eq("is_published", true)
     .order("sort_order", { ascending: true });
 
   if (modError) throw new Error(modError.message);
@@ -101,7 +100,6 @@ export async function getModuleForStaff(moduleId: string): Promise<TrainingModul
     .from("training_modules")
     .select("*")
     .eq("id", moduleId)
-    .eq("is_published", true)
     .single();
   if (error) {
     if (error.code === "PGRST116") return null;

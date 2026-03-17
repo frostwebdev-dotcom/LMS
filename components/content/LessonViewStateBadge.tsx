@@ -11,11 +11,11 @@ interface LessonViewStateBadgeProps {
 
 const config: Record<LessonViewState, { label: string; className: string }> = {
   not_started: {
-    label: "Not started",
+    label: "Not viewed",
     className: "bg-slate-100 text-slate-600",
   },
   complete: {
-    label: "Complete",
+    label: "Viewed",
     className: "bg-emerald-100 text-emerald-800",
   },
 };

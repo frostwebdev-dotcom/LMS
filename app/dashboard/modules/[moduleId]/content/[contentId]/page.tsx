@@ -4,6 +4,7 @@ import { requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { getContentById, getContentByModuleId, getSignedUrl } from "@/services/content-service";
 import { ContentViewer } from "@/components/content/ContentViewer";
+import { RecordLessonView } from "@/components/content/RecordLessonView";
 
 export default async function LessonViewerPage({
   params,
@@ -67,6 +68,7 @@ export default async function LessonViewerPage({
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {content.title}
       </h1>
+      <RecordLessonView contentId={contentId} />
       <ContentViewer
         contentType={content.content_type}
         signedUrl={signedUrl}

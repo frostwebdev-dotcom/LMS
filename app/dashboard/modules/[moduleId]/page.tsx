@@ -9,6 +9,8 @@ import {
   getQuizBestAttempt,
   getModuleProgressCompletedAt,
 } from "@/services/progress-service";
+import { getModuleCompletionState } from "@/services/module-completion-service";
+import { CompleteTrainingBlock } from "@/components/dashboard/CompleteTrainingBlock";
 import { formatModuleCompletedAt, formatExpirationDate } from "@/lib/format-completion-date";
 import { computeExpiration } from "@/lib/expiration";
 import { ExpirationBadge } from "@/components/dashboard/ExpirationBadge";
@@ -36,10 +38,11 @@ export default async function ModuleDetailPage({
   if (!module) notFound();
 
   const contentIds = content.map((c) => c.id);
-  const [completedContent, quizAttempt, progressCompletedAt] = await Promise.all([
+  const [completedContent, quizAttempt, progressCompletedAt, completionState] = await Promise.all([
     getContentProgressSet(user.id, contentIds),
     quiz ? getQuizBestAttempt(user.id, quiz.id) : Promise.resolve(null),
     getModuleProgressCompletedAt(user.id, moduleId),
+    getModuleCompletionState(user.id, moduleId),
   ]);
 
   const lessonsWithState = content.map((item) => ({
@@ -53,12 +56,11 @@ export default async function ModuleDetailPage({
     (quizAttempt?.passed ? 1 : 0);
   const progressPercent =
     totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-  const status: ModuleProgressStatus =
-    progressCompletedAt || progressPercent === 100
-      ? "completed"
-      : progressPercent > 0
-        ? "in_progress"
-        : "not_started";
+  const status: ModuleProgressStatus = progressCompletedAt
+    ? "completed"
+    : progressPercent > 0
+      ? "in_progress"
+      : "not_started";
 
   const expiration = computeExpiration(progressCompletedAt, module.expiration_months);
 
@@ -142,6 +144,18 @@ export default async function ModuleDetailPage({
           </AccordionItem>
         )}
       </Accordion>
+
+      {/* Complete Training: only after all lessons viewed + quiz passed */}
+      {content.length > 0 && (
+        <CompleteTrainingBlock
+          moduleId={moduleId}
+          moduleTitle={module.title}
+          allLessonsViewed={completionState.allLessonsCompleted}
+          hasQuiz={completionState.hasQuiz}
+          quizPassed={completionState.quizPassed}
+          alreadyCompleted={!!progressCompletedAt}
+        />
+      )}
 
       {content.length === 0 && !quiz && (
         <p className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-600">

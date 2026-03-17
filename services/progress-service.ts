@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { submitQuiz } from "@/services/quiz-submission-service";
-import { updateModuleCompletionIfEligible } from "@/services/module-completion-service";
 import type { QuizSubmitResult } from "@/types/quiz";
 
 export type { QuizSubmitResult } from "@/types/quiz";
@@ -27,15 +26,6 @@ export async function markContentComplete(userId: string, contentId: string): Pr
     { onConflict: "user_id,lesson_id" }
   );
   if (error) throw new Error(error.message);
-
-  const { data: lesson } = await supabase
-    .from("training_lessons")
-    .select("module_id")
-    .eq("id", contentId)
-    .single();
-  if (lesson?.module_id) {
-    await updateModuleCompletionIfEligible(userId, lesson.module_id);
-  }
 }
 
 export async function markModuleComplete(userId: string, moduleId: string): Promise<void> {

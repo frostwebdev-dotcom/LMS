@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { updateModuleCompletionIfEligible } from "@/services/module-completion-service";
 import type { SubmitQuizInput, QuizSubmitResult } from "@/types/quiz";
 
 /**
@@ -40,7 +39,6 @@ export async function submitQuiz(
     .single();
   if (quizError || !quiz) throw new Error("Quiz not found");
   const passed = scorePercent >= (quiz.passing_score_percent ?? 80);
-  const moduleId = (quiz as { module_id?: string }).module_id;
 
   const { data: attempt, error: attemptError } = await supabase
     .from("quiz_attempts")
@@ -61,10 +59,6 @@ export async function submitQuiz(
       answer_id: a.option_id,
     });
     if (ansError) throw new Error(ansError.message);
-  }
-
-  if (passed && moduleId) {
-    await updateModuleCompletionIfEligible(userId, moduleId);
   }
 
   return {

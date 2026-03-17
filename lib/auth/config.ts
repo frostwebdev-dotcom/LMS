@@ -9,6 +9,15 @@ export const AUTH_LOGIN_PATH = "/login";
 /** Path for the sign-up page. */
 export const AUTH_SIGNUP_PATH = "/signup";
 
+/** Path for the forgot-password request page. */
+export const AUTH_FORGOT_PASSWORD_PATH = "/forgot-password";
+
+/** Path for the reset-password page (recovery link lands here). */
+export const AUTH_RESET_PASSWORD_PATH = "/reset-password";
+
+/** Path for the authenticated account/settings page (change password). */
+export const ACCOUNT_PATH = "/dashboard/account";
+
 /** Default destination after login for staff. */
 export const STAFF_DEFAULT_PATH = "/dashboard";
 
@@ -40,7 +49,12 @@ export function isProtectedPath(pathname: string): boolean {
   return pathname.startsWith(STAFF_ROUTE_PREFIX) || pathname.startsWith(ADMIN_ROUTE_PREFIX);
 }
 
-/** Paths that are considered "auth" pages (login/signup). */
+/** Paths that are considered "auth" pages (login/signup, forgot/reset password). */
 export function isAuthPath(pathname: string): boolean {
-  return pathname === AUTH_LOGIN_PATH || pathname === AUTH_SIGNUP_PATH;
+  return (
+    pathname === AUTH_LOGIN_PATH ||
+    pathname === AUTH_SIGNUP_PATH ||
+    pathname === AUTH_FORGOT_PASSWORD_PATH ||
+    pathname === AUTH_RESET_PASSWORD_PATH
+  );
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { markLessonCompleteAction } from "@/app/actions/lesson-progress";
 import type { ContentType } from "@/types/database";
 import { PresentationContainer } from "./PresentationContainer";
 import { PdfPresentationViewer } from "./PdfPresentationViewer";
@@ -19,6 +17,10 @@ interface ContentViewerProps {
   nextHref: string | null;
 }
 
+/**
+ * Displays lesson content. View is recorded automatically by RecordLessonView on the page.
+ * Completion happens only at the end of the full training via "Complete Training" on the module page.
+ */
 export function ContentViewer({
   contentType,
   signedUrl,
@@ -28,34 +30,18 @@ export function ContentViewer({
   prevHref,
   nextHref,
 }: ContentViewerProps) {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-
-  const handleMarkComplete = () => {
-    setError(null);
-    startTransition(async () => {
-      try {
-        await markLessonCompleteAction(contentId);
-      } catch {
-        setError("Could not save. Sign in again if needed.");
-      }
-    });
-  };
-
   const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image";
   const hasMedia = isMedia && !!signedUrl;
   const hasText = contentType === "text" && contentText;
 
   return (
     <div className="space-y-4">
-      {/* Presentation-style media: fit screen, preserve landscape, no raw text for PDFs */}
       {contentType === "video" && hasMedia && (
         <PresentationContainer>
           <video
             src={signedUrl}
             controls
             className="h-full w-full object-contain"
-            onEnded={handleMarkComplete}
             playsInline
           />
         </PresentationContainer>
@@ -94,41 +80,24 @@ export function ContentViewer({
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2">
-          {error && (
-            <p className="text-sm text-red-600" role="alert">
-              {error}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={handleMarkComplete}
-            disabled={isPending}
-            className="order-2 sm:order-1 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition"
+      <nav className="flex gap-2" aria-label="Lesson navigation">
+        {prevHref && (
+          <Link
+            href={prevHref}
+            className="rounded-lg border border-primary-200 px-4 py-2.5 text-sm font-medium text-primary-700 hover:bg-primary-50 transition"
           >
-            {isPending ? "Saving…" : "Mark as complete"}
-          </button>
-        </div>
-        <nav className="flex gap-2 order-1 sm:order-2" aria-label="Lesson navigation">
-          {prevHref && (
-            <Link
-              href={prevHref}
-              className="rounded-lg border border-primary-200 px-4 py-2.5 text-sm font-medium text-primary-700 hover:bg-primary-50 transition"
-            >
-              ← Previous
-            </Link>
-          )}
-          {nextHref && (
-            <Link
-              href={nextHref}
-              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
-            >
-              Next →
-            </Link>
-          )}
-        </nav>
-      </div>
+            ← Previous
+          </Link>
+        )}
+        {nextHref && (
+          <Link
+            href={nextHref}
+            className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
+          >
+            Next →
+          </Link>
+        )}
+      </nav>
     </div>
   );
 }

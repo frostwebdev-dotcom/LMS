@@ -3,11 +3,14 @@ import Link from "next/link";
 import { getModuleById } from "@/services/module-service";
 import { getContentByModuleId } from "@/services/content-service";
 import { getQuizByModuleId } from "@/services/quiz-service";
+import { getModuleAssignments } from "@/services/module-assignment-service";
+import { getRoles, getAllProfilesWithRoles } from "@/services/admin-users-service";
 import { ModuleForm } from "@/components/admin/ModuleForm";
 import { ModuleDeleteForm } from "@/components/admin/ModuleDeleteForm";
 import { ResetModuleProgressForm } from "@/components/admin/ResetModuleProgressForm";
 import { AdminContentList } from "@/components/admin/AdminContentList";
 import { AdminQuizSection } from "@/components/admin/AdminQuizSection";
+import { ModuleAssignmentsSection } from "@/components/admin/ModuleAssignmentsSection";
 
 export default async function AdminModuleDetailPage({
   params,
@@ -15,10 +18,13 @@ export default async function AdminModuleDetailPage({
   params: Promise<{ moduleId: string }>;
 }) {
   const { moduleId } = await params;
-  const [trainingModule, content, quiz] = await Promise.all([
+  const [trainingModule, content, quiz, assignments, roles, profiles] = await Promise.all([
     getModuleById(moduleId),
     getContentByModuleId(moduleId),
     getQuizByModuleId(moduleId),
+    getModuleAssignments(moduleId),
+    getRoles(),
+    getAllProfilesWithRoles(),
   ]);
 
   if (!trainingModule) notFound();
@@ -42,6 +48,20 @@ export default async function AdminModuleDetailPage({
           initialExpirationMonths={trainingModule.expiration_months ?? null}
         />
         <ModuleDeleteForm moduleId={moduleId} />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-slate-800 mb-3">Assignments</h2>
+        <p className="text-sm text-slate-600 mb-3">
+          Control who can see this module. Staff see only modules assigned to their role or directly to them (when published).
+        </p>
+        <ModuleAssignmentsSection
+          moduleId={moduleId}
+          roles={roles}
+          profiles={profiles}
+          initialUserIds={assignments.userIds}
+          initialRoleIds={assignments.roleIds}
+        />
       </section>
 
       <section>

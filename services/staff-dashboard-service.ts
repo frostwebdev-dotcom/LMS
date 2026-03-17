@@ -20,7 +20,6 @@ export async function getStaffDashboardModules(
   const { data: modules, error: modError } = await supabase
     .from("training_modules")
     .select("id, title, description, sort_order, estimated_duration_minutes, expiration_months")
-    .eq("is_published", true)
     .order("sort_order", { ascending: true });
 
   if (modError) throw new Error(modError.message);
@@ -58,12 +57,11 @@ export async function getStaffDashboardModules(
     const progressPercent =
       totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
-    const status: ModuleProgressStatus =
-      progressCompletedAt || progressPercent === 100
-        ? "completed"
-        : progressPercent > 0
-          ? "in_progress"
-          : "not_started";
+    const status: ModuleProgressStatus = progressCompletedAt
+      ? "completed"
+      : progressPercent > 0
+        ? "in_progress"
+        : "not_started";
 
     const contentCount = lessonIds.length;
     const quizCount = quiz ? 1 : 0;
