@@ -156,10 +156,10 @@ interface FlashcardRow {
 function toFlashcards(rows: string[][]): FlashcardRow[] {
   if (rows.length === 0) return [];
 
-  const hasHeader = rows.length > 1 && rows[0].some((cell) => cell.trim().length > 0);
+  const hasHeader = rows.length > 1 && looksLikeHeaderRow(rows[0]);
   const headers = hasHeader
     ? rows[0].map((h, i) => h.trim() || `Column ${i + 1}`)
-    : rows[0].map((_, i) => `Column ${i + 1}`);
+    : [];
   const dataRows = hasHeader ? rows.slice(1) : rows;
 
   return dataRows
@@ -167,11 +167,15 @@ function toFlashcards(rows: string[][]): FlashcardRow[] {
     .map((row) => {
       const first = (row[0] ?? "").trim();
       const second = (row[1] ?? "").trim();
-      const frontLabel = headers[0] ?? "Front";
-      const backLabel = headers[1] ?? "Back";
+      const frontLabel = headers[0] ?? "";
+      const backLabel = headers[1] ?? "";
 
-      const front = first ? `${frontLabel}: ${first}` : frontLabel;
-      const back = second ? `${backLabel}: ${second}` : "No back content";
+      const front = first
+        ? (frontLabel ? `${frontLabel}: ${first}` : first)
+        : (frontLabel || "No front content");
+      const back = second
+        ? (backLabel ? `${backLabel}: ${second}` : second)
+        : (backLabel || "No back content");
 
       const extra = row.slice(2).map((value, idx) => ({
         label: headers[idx + 2] ?? `Column ${idx + 3}`,
@@ -180,6 +184,28 @@ function toFlashcards(rows: string[][]): FlashcardRow[] {
 
       return { front, back, extra };
     });
+}
+
+function looksLikeHeaderRow(row: string[]): boolean {
+  const knownHeaderWords = new Set([
+    "question",
+    "answer",
+    "front",
+    "back",
+    "term",
+    "definition",
+    "prompt",
+    "response",
+    "hint",
+    "explanation",
+  ]);
+
+  const normalized = row
+    .map((cell) => cell.trim().toLowerCase())
+    .filter((cell) => cell.length > 0);
+  if (normalized.length === 0) return false;
+
+  return normalized.every((cell) => knownHeaderWords.has(cell));
 }
 
 /**
