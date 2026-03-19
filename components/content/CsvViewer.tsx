@@ -64,8 +64,8 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
   const colCount = Math.max(...rows.map((r) => r.length), 1);
 
   return (
-    <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-primary-200 bg-white shadow-sm">
         <table className="min-w-full border-collapse text-sm">
           <tbody>
             {rows.map((row, i) => (

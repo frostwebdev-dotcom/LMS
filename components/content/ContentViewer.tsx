@@ -66,7 +66,7 @@ export function ContentViewer({
       )}
       {contentType === "csv" && hasMedia && (
         <PresentationContainer>
-          <div className="bg-white p-2 sm:p-4">
+          <div className="h-full bg-white p-2 sm:p-4">
             <CsvViewer signedUrl={signedUrl} />
           </div>
         </PresentationContainer>
