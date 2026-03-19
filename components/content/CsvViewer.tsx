@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface CsvViewerProps {
   signedUrl: string;
@@ -14,6 +14,8 @@ interface CsvViewerProps {
 export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [showBack, setShowBack] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +40,14 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
     };
   }, [signedUrl]);
 
+  useEffect(() => {
+    setCardIndex(0);
+    setShowBack(false);
+  }, [rows]);
+
+  const flashcards = useMemo(() => toFlashcards(rows ?? []), [rows]);
+  const current = flashcards[cardIndex] ?? null;
+
   if (error) {
     return (
       <div className="rounded-xl border border-primary-200 bg-primary-50/50 p-4 text-primary-700">
@@ -61,34 +71,68 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
     );
   }
 
-  const colCount = Math.max(...rows.map((r) => r.length), 1);
+  if (!current) {
+    return (
+      <div className="rounded-xl border border-primary-200 bg-white p-4 shadow-sm">
+        <p className="text-primary-700">No card content found in this CSV.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-primary-200 bg-white shadow-sm">
-        <table className="min-w-full border-collapse text-sm">
-          <tbody>
-            {rows.map((row, i) => (
-              <tr
-                key={i}
-                className={
-                  i === 0
-                    ? "border-b border-primary-200 bg-primary-50/70 font-medium text-primary-900"
-                    : "border-b border-slate-100 text-slate-700 last:border-b-0"
-                }
-              >
-                {Array.from({ length: colCount }, (_, j) => (
-                  <td
-                    key={j}
-                    className="border-r border-slate-100 px-3 py-2 last:border-r-0"
-                  >
-                    {row[j] ?? ""}
-                  </td>
-                ))}
-              </tr>
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <span>{title ?? "CSV flashcards"}</span>
+        <span>
+          Card {cardIndex + 1} of {flashcards.length}
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={() => setShowBack((v) => !v)}
+        className="min-h-[280px] w-full rounded-xl border border-primary-200 bg-white p-5 text-left shadow-sm transition hover:border-primary-300"
+      >
+        <p className="mb-2 text-xs uppercase tracking-wide text-primary-600">
+          {showBack ? "Back" : "Front"}
+        </p>
+        <p className="mb-4 text-lg font-semibold text-slate-900 whitespace-pre-wrap">
+          {showBack ? current.back : current.front}
+        </p>
+        {showBack && current.extra.length > 0 && (
+          <div className="space-y-2 border-t border-slate-100 pt-3">
+            {current.extra.map((item) => (
+              <p key={item.label} className="text-sm text-slate-700">
+                <span className="font-medium text-slate-900">{item.label}: </span>
+                <span className="whitespace-pre-wrap">{item.value}</span>
+              </p>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
+        <p className="mt-6 text-xs text-slate-500">Click card to flip</p>
+      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setCardIndex((i) => Math.max(0, i - 1));
+            setShowBack(false);
+          }}
+          disabled={cardIndex === 0}
+          className="rounded-lg border border-primary-200 px-3 py-2 text-sm font-medium text-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous Card
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setCardIndex((i) => Math.min(flashcards.length - 1, i + 1));
+            setShowBack(false);
+          }}
+          disabled={cardIndex >= flashcards.length - 1}
+          className="rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next Card
+        </button>
       </div>
       <p className="text-xs text-slate-500">
         <a
@@ -101,6 +145,41 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
       </p>
     </div>
   );
+}
+
+interface FlashcardRow {
+  front: string;
+  back: string;
+  extra: { label: string; value: string }[];
+}
+
+function toFlashcards(rows: string[][]): FlashcardRow[] {
+  if (rows.length === 0) return [];
+
+  const hasHeader = rows.length > 1 && rows[0].some((cell) => cell.trim().length > 0);
+  const headers = hasHeader
+    ? rows[0].map((h, i) => h.trim() || `Column ${i + 1}`)
+    : rows[0].map((_, i) => `Column ${i + 1}`);
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+
+  return dataRows
+    .filter((row) => row.some((cell) => cell.trim().length > 0))
+    .map((row) => {
+      const first = (row[0] ?? "").trim();
+      const second = (row[1] ?? "").trim();
+      const frontLabel = headers[0] ?? "Front";
+      const backLabel = headers[1] ?? "Back";
+
+      const front = first ? `${frontLabel}: ${first}` : frontLabel;
+      const back = second ? `${backLabel}: ${second}` : "No back content";
+
+      const extra = row.slice(2).map((value, idx) => ({
+        label: headers[idx + 2] ?? `Column ${idx + 3}`,
+        value: value ?? "",
+      }));
+
+      return { front, back, extra };
+    });
 }
 
 /**
