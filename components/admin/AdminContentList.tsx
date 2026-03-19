@@ -12,12 +12,13 @@ const contentTypeLabel: Record<ModuleContent["content_type"], string> = {
   pdf: "PDF",
   image: "Image",
   text: "Text",
+  csv: "CSV",
 };
 
 export function AdminContentList({ moduleId, content }: AdminContentListProps) {
   if (content.length === 0) {
     return (
-      <p className="text-slate-600 text-sm">No lessons yet. Add video, PDF, or image.</p>
+      <p className="text-slate-600 text-sm">No lessons yet. Add video, PDF, image, or CSV.</p>
     );
   }
   return (

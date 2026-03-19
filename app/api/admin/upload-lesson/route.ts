@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   const file = formData.get("file") as File | null;
   const moduleId = formData.get("module_id") as string | null;
   const title = String(formData.get("title") ?? "").trim();
-  const lessonType = formData.get("content_type") as "video" | "pdf" | "image" | null;
+  const lessonType = formData.get("content_type") as "video" | "pdf" | "image" | "csv" | null;
   const sortOrder = formData.get("sort_order") ? Number(formData.get("sort_order")) : 0;
 
   if (!file || !moduleId || !title || !lessonType) {

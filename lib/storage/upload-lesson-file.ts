@@ -49,6 +49,7 @@ export async function uploadLessonFile(
 /** Safe to use on client; used for storage upload content-type. */
 export function getDefaultContentType(ext: string): string {
   const map: Record<string, string> = {
+    csv: "text/csv",
     pdf: "application/pdf",
     mp4: "video/mp4",
     webm: "video/webm",

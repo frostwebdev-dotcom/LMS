@@ -22,14 +22,15 @@ export default async function LessonViewerPage({
 
   if (!module || !content || content.module_id !== module.id) notFound();
 
-  const isMedia =
+  const isFile =
     content.content_type === "video" ||
     content.content_type === "pdf" ||
-    content.content_type === "image";
+    content.content_type === "image" ||
+    content.content_type === "csv";
   const storagePath =
     content.storage_path && String(content.storage_path).trim();
   let signedUrl = "";
-  if (isMedia && storagePath) {
+  if (isFile && storagePath) {
     try {
       signedUrl = await getSignedUrl(storagePath);
     } catch {

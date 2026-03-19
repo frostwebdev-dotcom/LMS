@@ -27,7 +27,7 @@ export interface TrainingModule {
   updated_at: string;
 }
 
-export type ContentType = "video" | "pdf" | "image" | "text";
+export type ContentType = "video" | "pdf" | "image" | "text" | "csv";
 
 export interface ModuleContent {
   id: string;

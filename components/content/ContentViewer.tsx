@@ -4,10 +4,11 @@ import Link from "next/link";
 import type { ContentType } from "@/types/database";
 import { PresentationContainer } from "./PresentationContainer";
 import { PdfPresentationViewer } from "./PdfPresentationViewer";
+import { CsvViewer } from "./CsvViewer";
 
 interface ContentViewerProps {
   contentType: ContentType;
-  /** Signed URL for media (video/pdf/image). Empty for text or when unavailable. */
+  /** Signed URL for media (video/pdf/image/csv). Empty for text or when unavailable. */
   signedUrl: string;
   /** Plain text for lesson_type = 'text'. */
   contentText?: string | null;
@@ -30,7 +31,7 @@ export function ContentViewer({
   prevHref,
   nextHref,
 }: ContentViewerProps) {
-  const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image";
+  const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image" || contentType === "csv";
   const hasMedia = isMedia && !!signedUrl;
   const hasText = contentType === "text" && contentText;
 
@@ -60,6 +61,13 @@ export function ContentViewer({
               className="max-h-full max-w-full object-contain"
               draggable={false}
             />
+          </div>
+        </PresentationContainer>
+      )}
+      {contentType === "csv" && hasMedia && (
+        <PresentationContainer>
+          <div className="bg-white p-2 sm:p-4">
+            <CsvViewer signedUrl={signedUrl} />
           </div>
         </PresentationContainer>
       )}

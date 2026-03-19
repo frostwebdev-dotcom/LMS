@@ -34,10 +34,13 @@ export const ALLOWED_PDF_EXTENSIONS = ["pdf"] as const;
 
 export const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp"] as const;
 
+export const ALLOWED_CSV_EXTENSIONS = ["csv"] as const;
+
 export const ALLOWED_EXTENSIONS_BY_TYPE = {
   video: ALLOWED_VIDEO_EXTENSIONS,
   pdf: ALLOWED_PDF_EXTENSIONS,
   image: ALLOWED_IMAGE_EXTENSIONS,
+  csv: ALLOWED_CSV_EXTENSIONS,
 } as const;
 
 export type LessonMediaType = keyof typeof ALLOWED_EXTENSIONS_BY_TYPE;

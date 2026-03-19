@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const contentTypeEnum = z.enum(["video", "pdf", "image"]);
+export const contentTypeEnum = z.enum(["video", "pdf", "image", "csv"]);
 
 export const createContentSchema = z.object({
   module_id: z.string().uuid(),

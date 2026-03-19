@@ -10,6 +10,7 @@ const labels: Record<ContentType, string> = {
   pdf: "PDF",
   image: "Image",
   text: "Text",
+  csv: "CSV",
 };
 
 export function ContentTypeBadge({ type, className = "" }: ContentTypeBadgeProps) {

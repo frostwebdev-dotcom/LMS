@@ -20,7 +20,7 @@ export async function uploadContentAction(
   await requireAdmin();
   const file = formData.get("file") as File | null;
   const title = String(formData.get("title") ?? "").trim();
-  const contentType = formData.get("content_type") as "video" | "pdf" | "image" | null;
+  const contentType = formData.get("content_type") as "video" | "pdf" | "image" | "csv" | null;
   if (!file || !title || !contentType) {
     return { success: false, error: "Title, type, and file are required." };
   }
@@ -72,7 +72,7 @@ export async function uploadContentAction(
 export async function saveLessonFromUploadAction(payload: {
   moduleId: string;
   title: string;
-  content_type: "video" | "pdf" | "image";
+  content_type: "video" | "pdf" | "image" | "csv";
   sort_order: number;
   storage_path: string;
 }): Promise<ContentActionResult> {
