@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { requireUserOrRedirect } from "@/lib/auth/get-session";
+import { isStaff, requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
-import { getContentById, getContentByModuleId, getSignedUrl } from "@/services/content-service";
+import { createContentViewToken } from "@/lib/content-view-token";
+import { getContentById, getContentByModuleId } from "@/services/content-service";
 import { ContentViewer } from "@/components/content/ContentViewer";
 import { RecordLessonView } from "@/components/content/RecordLessonView";
 
@@ -12,7 +13,7 @@ export default async function LessonViewerPage({
   params: Promise<{ moduleId: string; contentId: string }>;
 }) {
   const { moduleId, contentId } = await params;
-  await requireUserOrRedirect();
+  const user = await requireUserOrRedirect();
 
   const [module, content, allContent] = await Promise.all([
     getModuleForStaff(moduleId),
@@ -29,14 +30,11 @@ export default async function LessonViewerPage({
     content.content_type === "csv";
   const storagePath =
     content.storage_path && String(content.storage_path).trim();
-  let signedUrl = "";
-  if (isFile && storagePath) {
-    try {
-      signedUrl = await getSignedUrl(storagePath);
-    } catch {
-      signedUrl = "";
-    }
-  }
+  /** Same-origin proxy with inline disposition — avoids mobile “download PDF” behavior and hides raw storage URLs. */
+  const mediaViewUrl =
+    isFile && storagePath
+      ? `/api/content/view/${contentId}?t=${encodeURIComponent(createContentViewToken(contentId))}`
+      : "";
 
   const currentIndex = allContent.findIndex((c) => c.id === contentId);
   const nextContent =
@@ -72,10 +70,11 @@ export default async function LessonViewerPage({
       <RecordLessonView contentId={contentId} />
       <ContentViewer
         contentType={content.content_type}
-        signedUrl={signedUrl}
+        mediaViewUrl={mediaViewUrl}
         contentText={content.content_text ?? null}
         contentId={contentId}
         moduleId={moduleId}
+        restrictPdfBrowserChrome={isStaff(user)}
         prevHref={
           prevContent
             ? `/dashboard/modules/${moduleId}/content/${prevContent.id}`

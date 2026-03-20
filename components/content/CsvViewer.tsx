@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 
 interface CsvViewerProps {
-  signedUrl: string;
+  /** Same-origin token-protected view URL (not a direct storage URL). */
+  mediaUrl: string;
   title?: string;
 }
 
 /**
- * Fetches CSV from signedUrl, parses it, and renders as a table with a download link.
- * Falls back to download-only if fetch or parse fails.
+ * Fetches CSV from the view URL and renders flashcards. View-only in-app (no download links).
  */
-export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
+export function CsvViewer({ mediaUrl, title }: CsvViewerProps) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cardIndex, setCardIndex] = useState(0);
@@ -21,7 +21,7 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
     let cancelled = false;
     setError(null);
     setRows(null);
-    fetch(signedUrl)
+    fetch(mediaUrl)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load CSV");
         return res.text();
@@ -38,7 +38,7 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
     return () => {
       cancelled = true;
     };
-  }, [signedUrl]);
+  }, [mediaUrl]);
 
   useEffect(() => {
     setCardIndex(0);
@@ -51,14 +51,7 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
   if (error) {
     return (
       <div className="rounded-xl border border-primary-200 bg-primary-50/50 p-4 text-primary-700">
-        <p className="mb-2">{error}</p>
-        <a
-          href={signedUrl}
-          download
-          className="text-sm font-medium text-primary-600 hover:underline"
-        >
-          Download CSV
-        </a>
+        <p>{error}</p>
       </div>
     );
   }
@@ -134,15 +127,6 @@ export function CsvViewer({ signedUrl, title }: CsvViewerProps) {
           Next Card
         </button>
       </div>
-      <p className="text-xs text-slate-500">
-        <a
-          href={signedUrl}
-          download
-          className="font-medium text-primary-600 hover:underline"
-        >
-          Download CSV
-        </a>
-      </p>
     </div>
   );
 }

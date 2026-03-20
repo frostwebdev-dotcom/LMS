@@ -15,20 +15,31 @@ interface PdfPresentationViewerProps {
   title?: string;
   /** Optional class for the iframe wrapper. */
   className?: string;
+  /**
+   * Uses PDF open parameters to hide the browser’s PDF toolbar (and its download control)
+   * where supported (e.g. Chromium). Does not prevent determined users from saving the file.
+   */
+  restrictBrowserChrome?: boolean;
 }
 
-/** PDF open parameters for embedded viewer: fit to width to preserve landscape. */
-const PDF_VIEW_PARAMS = "#view=FitH";
+/** PDF open parameters: fit to width; optional minimal chrome for staff viewers. */
+function pdfFragment(restrictBrowserChrome: boolean) {
+  if (restrictBrowserChrome) {
+    return "#toolbar=0&navpanes=0&view=FitH";
+  }
+  return "#view=FitH";
+}
 
 export function PdfPresentationViewer({
   src,
   title = "PDF document",
   className = "",
+  restrictBrowserChrome = false,
 }: PdfPresentationViewerProps) {
   const urlWithView = useMemo(() => {
     const base = src.split("#")[0];
-    return `${base}${PDF_VIEW_PARAMS}`;
-  }, [src]);
+    return `${base}${pdfFragment(restrictBrowserChrome)}`;
+  }, [src, restrictBrowserChrome]);
 
   return (
     <iframe
@@ -37,6 +48,7 @@ export function PdfPresentationViewer({
       className={`h-full w-full border-0 ${className}`}
       allow="fullscreen"
       allowFullScreen
+      referrerPolicy="no-referrer"
     />
   );
 }

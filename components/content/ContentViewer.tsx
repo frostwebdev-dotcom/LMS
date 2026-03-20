@@ -8,12 +8,14 @@ import { CsvViewer } from "./CsvViewer";
 
 interface ContentViewerProps {
   contentType: ContentType;
-  /** Signed URL for media (video/pdf/image/csv). Empty for text or when unavailable. */
-  signedUrl: string;
+  /** Same-origin view URL (token-protected proxy; inline disposition). Empty when unavailable. */
+  mediaViewUrl: string;
   /** Plain text for lesson_type = 'text'. */
   contentText?: string | null;
   contentId: string;
   moduleId: string;
+  /** Hide browser PDF toolbar (incl. download) for non-admin viewers where supported. */
+  restrictPdfBrowserChrome?: boolean;
   prevHref: string | null;
   nextHref: string | null;
 }
@@ -24,15 +26,16 @@ interface ContentViewerProps {
  */
 export function ContentViewer({
   contentType,
-  signedUrl,
+  mediaViewUrl,
   contentText,
   contentId,
   moduleId,
+  restrictPdfBrowserChrome = false,
   prevHref,
   nextHref,
 }: ContentViewerProps) {
   const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image" || contentType === "csv";
-  const hasMedia = isMedia && !!signedUrl;
+  const hasMedia = isMedia && !!mediaViewUrl;
   const hasText = contentType === "text" && contentText;
 
   return (
@@ -40,8 +43,9 @@ export function ContentViewer({
       {contentType === "video" && hasMedia && (
         <PresentationContainer>
           <video
-            src={signedUrl}
+            src={mediaViewUrl}
             controls
+            controlsList="nodownload"
             className="h-full w-full object-contain"
             playsInline
           />
@@ -49,17 +53,22 @@ export function ContentViewer({
       )}
       {contentType === "pdf" && hasMedia && (
         <PresentationContainer>
-          <PdfPresentationViewer src={signedUrl} title="PDF presentation" />
+          <PdfPresentationViewer
+            src={mediaViewUrl}
+            title="PDF presentation"
+            restrictBrowserChrome={restrictPdfBrowserChrome}
+          />
         </PresentationContainer>
       )}
       {contentType === "image" && hasMedia && (
         <PresentationContainer>
           <div className="flex h-full w-full items-center justify-center bg-white p-2 sm:p-4">
             <img
-              src={signedUrl}
+              src={mediaViewUrl}
               alt="Presentation"
-              className="max-h-full max-w-full object-contain"
+              className="max-h-full max-w-full object-contain select-none"
               draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
         </PresentationContainer>
@@ -67,7 +76,7 @@ export function ContentViewer({
       {contentType === "csv" && hasMedia && (
         <PresentationContainer>
           <div className="h-full bg-white p-2 sm:p-4">
-            <CsvViewer signedUrl={signedUrl} />
+            <CsvViewer mediaUrl={mediaViewUrl} />
           </div>
         </PresentationContainer>
       )}
