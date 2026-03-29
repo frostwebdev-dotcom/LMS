@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useActionState } from "react";
 import { signUp } from "@/app/actions/auth";
 import { Toast } from "@/components/ui/Toast";
+import { PasswordField } from "@/components/ui/password-field";
 
 type Mode = "signin" | "signup";
 
@@ -115,17 +116,14 @@ export function AuthForm({ mode, redirectTo, error: urlError }: AuthFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-primary-800 mb-1">
-          Password
-        </label>
-        <input
+        <PasswordField
           id="password"
           name="password"
-          type="password"
+          label="Password"
           autoComplete={mode === "signin" ? "current-password" : "new-password"}
           required
           minLength={mode === "signup" ? 8 : undefined}
-          className="w-full rounded-lg border border-primary-200 px-3 py-2 text-primary-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          disabled={pending}
         />
         {mode === "signup" && (
           <p className="mt-1 text-xs text-primary-600">At least 8 characters</p>

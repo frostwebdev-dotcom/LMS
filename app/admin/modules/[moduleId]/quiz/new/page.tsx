@@ -26,7 +26,7 @@ export default async function NewQuizPage({
         Set the title, optional description, and passing score. After creating, you can add questions and answer choices on the edit page.
       </p>
       <QuizFormAdmin
-        action={(formData) => createQuizAndRedirectAction(moduleId, null, formData)}
+        action={createQuizAndRedirectAction.bind(null, moduleId, null)}
       />
     </div>
   );

@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ userDisplay, showAdminLink }: HeaderProps) {
   return (
-    <header className="border-b border-primary-200 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-primary-200 bg-white shadow-sm">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Logo href="/dashboard" height={36} />
         <nav className="flex items-center gap-3 sm:gap-4" aria-label="User menu">
