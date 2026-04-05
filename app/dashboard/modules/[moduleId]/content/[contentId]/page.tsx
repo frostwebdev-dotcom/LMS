@@ -4,6 +4,7 @@ import { isStaff, requireUserOrRedirect } from "@/lib/auth/get-session";
 import { getModuleForStaff } from "@/services/module-service";
 import { createContentViewToken } from "@/lib/content-view-token";
 import { getContentById, getContentByModuleId } from "@/services/content-service";
+import { getQuizByModuleId } from "@/services/quiz-service";
 import { ContentViewer } from "@/components/content/ContentViewer";
 import { RecordLessonView } from "@/components/content/RecordLessonView";
 
@@ -15,10 +16,11 @@ export default async function LessonViewerPage({
   const { moduleId, contentId } = await params;
   const user = await requireUserOrRedirect();
 
-  const [module, content, allContent] = await Promise.all([
+  const [module, content, allContent, quiz] = await Promise.all([
     getModuleForStaff(moduleId),
     getContentById(contentId),
     getContentByModuleId(moduleId),
+    getQuizByModuleId(moduleId),
   ]);
 
   if (!module || !content || content.module_id !== module.id) notFound();
@@ -42,6 +44,15 @@ export default async function LessonViewerPage({
       ? allContent[currentIndex + 1]
       : null;
   const prevContent = currentIndex > 0 ? allContent[currentIndex - 1] : null;
+
+  const isLastLesson =
+    currentIndex >= 0 &&
+    allContent.length > 0 &&
+    currentIndex === allContent.length - 1;
+  const quizHref =
+    isLastLesson && quiz
+      ? `/dashboard/modules/${moduleId}/quiz`
+      : null;
 
   return (
     <div className="space-y-6">
@@ -85,6 +96,7 @@ export default async function LessonViewerPage({
             ? `/dashboard/modules/${moduleId}/content/${nextContent.id}`
             : null
         }
+        quizHref={quizHref}
       />
     </div>
   );

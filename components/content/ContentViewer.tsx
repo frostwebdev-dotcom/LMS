@@ -18,6 +18,8 @@ interface ContentViewerProps {
   restrictPdfBrowserChrome?: boolean;
   prevHref: string | null;
   nextHref: string | null;
+  /** Set on the last lesson when the module has a quiz — primary CTA to open the quiz. */
+  quizHref?: string | null;
 }
 
 /**
@@ -33,6 +35,7 @@ export function ContentViewer({
   restrictPdfBrowserChrome = false,
   prevHref,
   nextHref,
+  quizHref = null,
 }: ContentViewerProps) {
   const isMedia = contentType === "video" || contentType === "pdf" || contentType === "image" || contentType === "csv";
   const hasMedia = isMedia && !!mediaViewUrl;
@@ -97,7 +100,10 @@ export function ContentViewer({
         </div>
       )}
 
-      <nav className="flex gap-2" aria-label="Lesson navigation">
+      <nav
+        className="flex flex-wrap items-center gap-2"
+        aria-label="Lesson and quiz navigation"
+      >
         {prevHref && (
           <Link
             href={prevHref}
@@ -112,6 +118,14 @@ export function ContentViewer({
             className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition"
           >
             Next →
+          </Link>
+        )}
+        {quizHref && (
+          <Link
+            href={quizHref}
+            className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+          >
+            Take the quiz →
           </Link>
         )}
       </nav>
