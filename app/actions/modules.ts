@@ -23,6 +23,7 @@ export async function createModuleAction(
     description: formData.get("description") || null,
     sort_order: rawSort ? Number(rawSort) : 0,
     expiration_months: rawExp === "" || rawExp === null ? null : rawExp ? Number(rawExp) : undefined,
+    category_id: formData.get("category_id"),
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };
@@ -55,6 +56,7 @@ export async function updateModuleAction(
     sort_order: formData.get("sort_order") ? Number(formData.get("sort_order")) : undefined,
     is_published: formData.get("is_published") === "on" || formData.get("is_published") === "true",
     expiration_months: rawExp === "" || rawExp === null ? null : rawExp ? Number(rawExp) : undefined,
+    category_id: formData.get("category_id"),
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message ?? "Validation failed" };

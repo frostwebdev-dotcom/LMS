@@ -5,6 +5,7 @@ import { getContentByModuleId } from "@/services/content-service";
 import { getQuizByModuleId } from "@/services/quiz-service";
 import { getModuleAssignments } from "@/services/module-assignment-service";
 import { getRoles, getAllProfilesWithRoles } from "@/services/admin-users-service";
+import { getTrainingCategoriesForAdmin } from "@/services/training-category-service";
 import { ModuleForm } from "@/components/admin/ModuleForm";
 import { ModuleDeleteForm } from "@/components/admin/ModuleDeleteForm";
 import { ResetModuleProgressForm } from "@/components/admin/ResetModuleProgressForm";
@@ -18,13 +19,14 @@ export default async function AdminModuleDetailPage({
   params: Promise<{ moduleId: string }>;
 }) {
   const { moduleId } = await params;
-  const [trainingModule, content, quiz, assignments, roles, profiles] = await Promise.all([
+  const [trainingModule, content, quiz, assignments, roles, profiles, categories] = await Promise.all([
     getModuleById(moduleId),
     getContentByModuleId(moduleId),
     getQuizByModuleId(moduleId),
     getModuleAssignments(moduleId),
     getRoles(),
     getAllProfilesWithRoles(),
+    getTrainingCategoriesForAdmin(),
   ]);
 
   if (!trainingModule) notFound();
@@ -41,11 +43,13 @@ export default async function AdminModuleDetailPage({
         <h2 className="text-lg font-semibold text-slate-800 mb-3">Module details</h2>
         <ModuleForm
           moduleId={moduleId}
+          categories={categories}
           initialTitle={trainingModule.title}
           initialDescription={trainingModule.description}
           initialSortOrder={trainingModule.sort_order}
           initialPublished={trainingModule.is_published}
           initialExpirationMonths={trainingModule.expiration_months ?? null}
+          initialCategoryId={trainingModule.category_id}
         />
         <ModuleDeleteForm moduleId={moduleId} />
       </section>

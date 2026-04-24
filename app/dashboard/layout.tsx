@@ -17,6 +17,7 @@ export default async function DashboardLayout({
           role: user.role,
         }}
         showAdminLink={isAdmin(user)}
+        showCertificatesLink
       />
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</main>
     </div>

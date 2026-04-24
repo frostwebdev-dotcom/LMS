@@ -66,5 +66,6 @@ export async function submitQuiz(
     passed,
     totalQuestions,
     correctCount,
+    moduleId: quiz.module_id as string,
   };
 }

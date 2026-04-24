@@ -10,7 +10,9 @@ import {
   getModuleProgressCompletedAt,
 } from "@/services/progress-service";
 import { getModuleCompletionState } from "@/services/module-completion-service";
+import { getCertificateForUserAndModule } from "@/services/certificate-service";
 import { CompleteTrainingBlock } from "@/components/dashboard/CompleteTrainingBlock";
+import { CertificateDownloadSection } from "@/components/dashboard/CertificateDownloadSection";
 import { formatModuleCompletedAt, formatExpirationDate } from "@/lib/format-completion-date";
 import { computeExpiration } from "@/lib/expiration";
 import { ExpirationBadge } from "@/components/dashboard/ExpirationBadge";
@@ -38,11 +40,12 @@ export default async function ModuleDetailPage({
   if (!module) notFound();
 
   const contentIds = content.map((c) => c.id);
-  const [completedContent, quizAttempt, progressCompletedAt, completionState] = await Promise.all([
+  const [completedContent, quizAttempt, progressCompletedAt, completionState, certificate] = await Promise.all([
     getContentProgressSet(user.id, contentIds),
     quiz ? getQuizBestAttempt(user.id, quiz.id) : Promise.resolve(null),
     getModuleProgressCompletedAt(user.id, moduleId),
     getModuleCompletionState(user.id, moduleId),
+    getCertificateForUserAndModule(user.id, moduleId),
   ]);
 
   const lessonsWithState = content.map((item) => ({
@@ -155,6 +158,10 @@ export default async function ModuleDetailPage({
           quizPassed={completionState.quizPassed}
           alreadyCompleted={!!progressCompletedAt}
         />
+      )}
+
+      {progressCompletedAt && (
+        <CertificateDownloadSection certificate={certificate} moduleTitle={module.title} />
       )}
 
       {content.length === 0 && !quiz && (

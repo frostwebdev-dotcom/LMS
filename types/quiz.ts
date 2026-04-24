@@ -141,4 +141,6 @@ export interface QuizSubmitResult {
   passed: boolean;
   totalQuestions: number;
   correctCount: number;
+  /** Training module this quiz belongs to (for auto-completion after a pass). */
+  moduleId: string;
 }

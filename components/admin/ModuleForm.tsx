@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { createModuleAction, updateModuleAction } from "@/app/actions/modules";
 import type { ModuleActionResult } from "@/app/actions/modules";
+import { DEFAULT_TRAINING_CATEGORY_ID } from "@/lib/constants/default-training-category";
+import type { TrainingCategory } from "@/types/database";
 
 interface ModuleFormProps {
   initialTitle?: string;
@@ -13,6 +16,8 @@ interface ModuleFormProps {
   initialPublished?: boolean;
   /** Months after completion until training expires. Default 12 (annual). */
   initialExpirationMonths?: number | null;
+  initialCategoryId?: string | null;
+  categories: TrainingCategory[];
   moduleId?: string;
 }
 
@@ -22,10 +27,15 @@ export function ModuleForm({
   initialSortOrder = 0,
   initialPublished = false,
   initialExpirationMonths = null,
+  initialCategoryId = null,
+  categories,
   moduleId,
 }: ModuleFormProps) {
   const router = useRouter();
   const isEdit = Boolean(moduleId);
+  const firstActiveCategoryId = categories.find((c) => c.is_active)?.id;
+  const categorySelectDefault =
+    initialCategoryId ?? firstActiveCategoryId ?? DEFAULT_TRAINING_CATEGORY_ID;
   const [state, formAction, isPending] = useActionState(
     isEdit && moduleId
       ? (_prev: ModuleActionResult | null, fd: FormData) =>
@@ -59,6 +69,34 @@ export function ModuleForm({
           defaultValue={initialTitle}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
         />
+      </div>
+      <div>
+        <label htmlFor="category_id" className="block text-sm font-medium text-slate-700 mb-1">
+          Training category
+        </label>
+        <select
+          id="category_id"
+          name="category_id"
+          required
+          defaultValue={categorySelectDefault}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+        >
+          {categories.map((c) => (
+            <option key={c.id} value={c.id} disabled={!c.is_active}>
+              {c.name}
+              {!c.is_active ? " (inactive)" : ""}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-slate-500">
+          Every module belongs to one portal category (Homecare, Home Healthcare, Leadership, etc.).{" "}
+          <Link
+            href="/admin/categories"
+            className="font-medium text-primary-600 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded"
+          >
+            Manage categories
+          </Link>
+        </p>
       </div>
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">

@@ -7,9 +7,11 @@ import type { UserAccountMenuProps } from "@/components/layout/UserAccountMenu";
 export type DashboardAppHeaderProps = {
   user: Pick<UserAccountMenuProps, "email" | "fullName" | "role">;
   showAdminLink: boolean;
+  /** Show “My certificates” in the account menu (staff dashboard). */
+  showCertificatesLink?: boolean;
 };
 
-export function DashboardAppHeader({ user, showAdminLink }: DashboardAppHeaderProps) {
+export function DashboardAppHeader({ user, showAdminLink, showCertificatesLink = false }: DashboardAppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-primary-200/90 bg-white/95 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/90">
       <div className="mx-auto flex max-w-6xl min-h-14 items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
@@ -19,6 +21,7 @@ export function DashboardAppHeader({ user, showAdminLink }: DashboardAppHeaderPr
           fullName={user.fullName}
           role={user.role}
           showAdminLink={showAdminLink}
+          showCertificatesLink={showCertificatesLink}
         />
       </div>
     </header>

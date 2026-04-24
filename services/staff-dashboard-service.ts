@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { computeExpiration } from "@/lib/expiration";
+import { DEFAULT_TRAINING_CATEGORY_ID } from "@/lib/constants/default-training-category";
+import {
+  TRAINING_MODULE_CATEGORY_EMBED,
+  normalizeModuleCategoryRow,
+} from "@/services/module-service";
+import type { TrainingModule } from "@/types/database";
 import type {
   StaffDashboardModule,
   ModuleProgressStatus,
@@ -17,10 +23,15 @@ export async function getStaffDashboardModules(
 ): Promise<StaffDashboardModule[]> {
   const supabase = await createClient();
 
-  const { data: modules, error: modError } = await supabase
+  const { data: rawModules, error: modError } = await supabase
     .from("training_modules")
-    .select("id, title, description, sort_order, estimated_duration_minutes, expiration_months")
+    .select(
+      `id, title, description, sort_order, estimated_duration_minutes, expiration_months, category_id, ${TRAINING_MODULE_CATEGORY_EMBED}`
+    )
     .order("sort_order", { ascending: true });
+  const modules = (rawModules ?? []).map((r) =>
+    normalizeModuleCategoryRow(r as unknown as TrainingModule)
+  );
 
   if (modError) throw new Error(modError.message);
   if (!modules?.length) return [];
@@ -70,6 +81,11 @@ export async function getStaffDashboardModules(
         ? bestQuizAttemptByQuizId.get(quiz.id)! 
         : null;
 
+    const cat = m.category;
+    const categoryName = cat?.name ?? null;
+    const categorySlug = cat?.slug ?? null;
+    const categoryId = m.category_id ?? DEFAULT_TRAINING_CATEGORY_ID;
+
     const dbDuration = (m as { estimated_duration_minutes?: number | null }).estimated_duration_minutes;
     const estimatedDurationMinutes =
       typeof dbDuration === "number" && dbDuration >= 0
@@ -83,6 +99,9 @@ export async function getStaffDashboardModules(
       id: m.id,
       title: m.title,
       description: m.description ?? null,
+      categoryId,
+      categoryName,
+      categorySlug,
       estimatedDurationMinutes,
       status,
       progressPercent,

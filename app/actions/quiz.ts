@@ -1,12 +1,14 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSessionUser } from "@/lib/auth/get-session";
 import { submitQuizSchema } from "@/lib/validations/quiz";
+import { updateModuleCompletionIfEligible } from "@/services/module-completion-service";
 import { submitQuizAndGetResult } from "@/services/progress-service";
 
 export type QuizSubmitResult =
-  | { success: true; scorePercent: number; passed: boolean }
+  | { success: true; scorePercent: number; passed: boolean; moduleId: string }
   | { success: false; error: string };
 
 export async function submitQuizAction(
@@ -36,10 +38,21 @@ export async function submitQuizAction(
   }
   try {
     const result = await submitQuizAndGetResult(user.id, parsed.data.quiz_id, parsed.data.answers);
+    if (result.passed) {
+      try {
+        await updateModuleCompletionIfEligible(user.id, result.moduleId);
+      } catch (e) {
+        console.error("[module-completion] after quiz pass:", e);
+      }
+      revalidatePath(`/dashboard/modules/${result.moduleId}`);
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/certificates");
+    }
     return {
       success: true,
       scorePercent: result.scorePercent,
       passed: result.passed,
+      moduleId: result.moduleId,
     };
   } catch (err) {
     return {

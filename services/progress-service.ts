@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { issueCertificateAfterModuleCompletion } from "@/services/certificate-service";
 import { submitQuiz } from "@/services/quiz-submission-service";
 import type { QuizSubmitResult } from "@/types/quiz";
 
@@ -28,17 +29,41 @@ export async function markContentComplete(userId: string, contentId: string): Pr
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Marks module training complete for the user. Preserves the first `completed_at` if the row
+ * already exists (e.g. auto-completion ran first). Always attempts certificate issuance afterward
+ * (idempotent; safe if a certificate row already exists).
+ */
 export async function markModuleComplete(userId: string, moduleId: string): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("user_module_progress").upsert(
-    {
-      user_id: userId,
-      module_id: moduleId,
-      completed_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id,module_id" }
-  );
-  if (error) throw new Error(error.message);
+  const { data: existing, error: loadErr } = await supabase
+    .from("user_module_progress")
+    .select("completed_at")
+    .eq("user_id", userId)
+    .eq("module_id", moduleId)
+    .maybeSingle();
+
+  if (loadErr) throw new Error(loadErr.message);
+
+  const completedAt = (existing as { completed_at: string | null } | null)?.completed_at;
+
+  if (!completedAt) {
+    const { error } = await supabase.from("user_module_progress").upsert(
+      {
+        user_id: userId,
+        module_id: moduleId,
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,module_id" }
+    );
+    if (error) throw new Error(error.message);
+  }
+
+  try {
+    await issueCertificateAfterModuleCompletion(supabase, userId, moduleId);
+  } catch (e) {
+    console.error("[certificates] issue after completion:", e);
+  }
 }
 
 export async function getContentProgressSet(

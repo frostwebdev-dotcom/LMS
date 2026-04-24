@@ -25,6 +25,10 @@ export interface StaffDashboardModule {
   id: string;
   title: string;
   description: string | null;
+  /** Always set from training_modules.category_id. */
+  categoryId: string;
+  categoryName: string | null;
+  categorySlug: string | null;
   /** Estimated time to complete (minutes). From DB or computed from lesson/quiz count. */
   estimatedDurationMinutes: number;
   status: ModuleProgressStatus;

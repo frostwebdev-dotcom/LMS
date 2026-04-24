@@ -44,3 +44,18 @@ export function formatExpirationDate(isoString: string | null | undefined): stri
     year: "numeric",
   }).format(date);
 }
+
+/**
+ * Certificate list/PDF-style date (calendar day in UTC, matches stored completion/issue semantics).
+ */
+export function formatCertificateDateUtc(isoString: string | null | undefined): string {
+  if (isoString == null || isoString === "") return "—";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}

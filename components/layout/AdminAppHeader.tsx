@@ -10,8 +10,10 @@ import type { UserAccountMenuProps } from "@/components/layout/UserAccountMenu";
 const ADMIN_NAV = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/modules", label: "Modules" },
+  { href: "/admin/categories", label: "Categories" },
   { href: "/admin/assignments", label: "Assignments" },
   { href: "/admin/progress", label: "Staff progress" },
+  { href: "/admin/certificates", label: "Certificates" },
   { href: "/admin/users", label: "Users" },
 ] as const;
 

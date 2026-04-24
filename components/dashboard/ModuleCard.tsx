@@ -21,7 +21,14 @@ export function ModuleCard({ module }: ModuleCardProps) {
           <h2 className="text-base font-semibold text-primary-900 sm:text-lg min-w-0 flex-1">
             {module.title}
           </h2>
-          <StatusBadge status={module.status} />
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            {module.categoryName && (
+              <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800">
+                {module.categoryName}
+              </span>
+            )}
+            <StatusBadge status={module.status} />
+          </div>
         </div>
         {module.description && (
           <p className="mb-3 line-clamp-2 flex-1 text-sm text-primary-700 min-h-0">

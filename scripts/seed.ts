@@ -54,6 +54,8 @@ const DEFAULT_PASSWORD = "SeedPassword1!";
 
 const MODULE1_ID = "a0000001-0000-4000-8000-000000000001";
 const MODULE2_ID = "a0000002-0000-4000-8000-000000000002";
+const CATEGORY_HOMECARE_ID = "b1111111-1111-1111-1111-111111111101";
+const CATEGORY_LEADERSHIP_ID = "b1111111-1111-1111-1111-111111111103";
 
 async function main() {
   console.log("Seeding...");
@@ -126,6 +128,7 @@ async function main() {
         sort_order: 0,
         is_published: true,
         estimated_duration_minutes: 15,
+        category_id: CATEGORY_HOMECARE_ID,
       },
       {
         id: MODULE2_ID,
@@ -134,6 +137,7 @@ async function main() {
         sort_order: 1,
         is_published: true,
         estimated_duration_minutes: 20,
+        category_id: CATEGORY_LEADERSHIP_ID,
       },
     ],
     { onConflict: "id" }

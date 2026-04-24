@@ -1,10 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
+import { issueCertificateAfterModuleCompletion } from "@/services/certificate-service";
 
 /**
- * Production-ready module completion rules (reusable).
- * A module is completed only when:
- * 1. All required lessons are viewed (completed),
- * 2. Quiz is passed (or module has no quiz).
+ * Module completion and automatic certificates (service layer; no UI here).
+ *
+ * **Completion flow**
+ * - `updateModuleCompletionIfEligible` runs after a lesson is marked complete or after a passing
+ *   quiz submission (see server actions). It writes `user_module_progress.completed_at` once all
+ *   lessons are done and the quiz is passed (or there is no quiz), preserving the first timestamp.
+ * - `markModuleComplete` (progress-service) is used by the explicit “Complete Training” action; it
+ *   preserves an existing `completed_at` and always triggers certificate issuance (idempotent).
+ *
+ * **Certificates**
+ * - After any path persists completion, `issueCertificateAfterModuleCompletion` inserts at most one
+ *   row per (user, module) (DB unique), builds the PDF, uploads to storage, and updates metadata.
+ * - Failures there are logged and never thrown past completion writes.
  */
 
 /** Required lesson IDs for a module (all lessons in the module). */
@@ -128,4 +138,9 @@ export async function updateModuleCompletionIfEligible(
     { onConflict: "user_id,module_id" }
   );
   if (error) throw new Error(error.message);
+  try {
+    await issueCertificateAfterModuleCompletion(supabase, userId, moduleId);
+  } catch (e) {
+    console.error("[certificates] issue after auto completion:", e);
+  }
 }

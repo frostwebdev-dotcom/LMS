@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { requireAdminOrRedirect } from "@/lib/auth/get-session";
 import { getAdminDashboardStats } from "@/services/admin-dashboard-service";
-import { getAllModulesForAdmin } from "@/services/module-service";
+import { getAdminTrainingByCategory } from "@/services/admin-training-by-category-service";
 import { AdminDashboardSummary } from "@/components/admin/AdminDashboardSummary";
+import { AdminTrainingCategoriesSection } from "@/components/admin/training/AdminTrainingCategoriesSection";
 
 export default async function AdminDashboardPage() {
   await requireAdminOrRedirect();
-  const [stats, modules] = await Promise.all([
+  const [stats, trainingByCategory] = await Promise.all([
     getAdminDashboardStats(),
-    getAllModulesForAdmin(),
+    getAdminTrainingByCategory(),
   ]);
 
   return (
@@ -24,41 +24,7 @@ export default async function AdminDashboardPage() {
 
       <AdminDashboardSummary stats={stats} />
 
-      {/* Extensible: add more sections below (e.g. recent activity, quick actions) */}
-      <section aria-labelledby="modules-heading">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 id="modules-heading" className="text-lg font-semibold text-primary-900">
-            Modules
-          </h2>
-          <Link
-            href="/admin/modules/new"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-          >
-            Add module
-          </Link>
-        </div>
-        {modules.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-primary-200 bg-white p-6 text-center text-primary-700">
-            No modules yet. Create one to get started.
-          </div>
-        ) : (
-          <ul className="mt-4 space-y-2">
-            {modules.map((m) => (
-              <li key={m.id}>
-                <Link
-                  href={`/admin/modules/${m.id}`}
-                  className="block rounded-lg border border-primary-200 bg-white px-4 py-3 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  <span className="font-medium text-primary-900">{m.title}</span>
-                  <span className="ml-2 text-sm text-primary-600">
-                    {m.is_published ? "Published" : "Draft"}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <AdminTrainingCategoriesSection blocks={trainingByCategory} />
     </div>
   );
 }

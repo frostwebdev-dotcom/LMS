@@ -13,6 +13,8 @@ export interface UserAccountMenuProps {
   role: UserRole;
   /** Dashboard: link to admin console */
   showAdminLink?: boolean;
+  /** Staff dashboard: link to completed-module certificates */
+  showCertificatesLink?: boolean;
   /** Admin shell: link back to staff dashboard */
   showStaffViewLink?: boolean;
 }
@@ -72,6 +74,7 @@ export function UserAccountMenu({
   fullName,
   role,
   showAdminLink = false,
+  showCertificatesLink = false,
   showStaffViewLink = false,
 }: UserAccountMenuProps) {
   const [open, setOpen] = useState(false);
@@ -160,6 +163,12 @@ export function UserAccountMenu({
               <IconUser className="h-5 w-5 shrink-0 text-primary-600" />
               <span>Account and security</span>
             </Link>
+            {showCertificatesLink && (
+              <Link href="/dashboard/certificates" role="menuitem" className={menuItemClass} onClick={close}>
+                <IconShield className="h-5 w-5 shrink-0 text-primary-600" />
+                <span>My certificates</span>
+              </Link>
+            )}
             {showAdminLink && (
               <Link href={ADMIN_ROUTE_PREFIX} role="menuitem" className={menuItemClass} onClick={close}>
                 <IconShield className="h-5 w-5 shrink-0 text-primary-600" />

@@ -43,5 +43,6 @@ export async function completeModuleTrainingAction(
   await markModuleComplete(user.id, moduleId);
   revalidatePath(`/dashboard/modules/${moduleId}`);
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/certificates");
   return { success: true };
 }

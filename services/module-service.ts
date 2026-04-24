@@ -1,5 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-import type { TrainingModule } from "@/types/database";
+import type { TrainingCategory, TrainingModule } from "@/types/database";
+
+export const TRAINING_MODULE_CATEGORY_EMBED =
+  "category:training_categories!training_modules_category_id_fkey(id, name, slug, description, icon, display_order, is_active, created_at, updated_at)";
+
+export function normalizeModuleCategoryRow<T extends TrainingModule>(row: T): T {
+  const raw = row.category;
+  const category: TrainingCategory | null | undefined = Array.isArray(raw)
+    ? (raw[0] as TrainingCategory | undefined) ?? null
+    : raw;
+  return { ...row, category: category ?? null };
+}
 
 export interface ModuleWithProgress extends TrainingModule {
   progress_completed_at: string | null;
@@ -9,10 +20,11 @@ export interface ModuleWithProgress extends TrainingModule {
 
 export async function getPublishedModules(userId: string): Promise<ModuleWithProgress[]> {
   const supabase = await createClient();
-  const { data: modules, error: modError } = await supabase
+  const { data: rawModules, error: modError } = await supabase
     .from("training_modules")
-    .select("*")
+    .select(`*, ${TRAINING_MODULE_CATEGORY_EMBED}`)
     .order("sort_order", { ascending: true });
+  const modules = (rawModules ?? []).map((r) => normalizeModuleCategoryRow(r as TrainingModule));
 
   if (modError) throw new Error(modError.message);
   if (!modules?.length) return [];
@@ -74,36 +86,36 @@ export async function getAllModulesForAdmin(): Promise<TrainingModule[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("training_modules")
-    .select("*")
+    .select(`*, ${TRAINING_MODULE_CATEGORY_EMBED}`)
     .order("sort_order", { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []) as TrainingModule[];
+  return (data ?? []).map((r) => normalizeModuleCategoryRow(r as TrainingModule));
 }
 
 export async function getModuleById(moduleId: string): Promise<TrainingModule | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("training_modules")
-    .select("*")
+    .select(`*, ${TRAINING_MODULE_CATEGORY_EMBED}`)
     .eq("id", moduleId)
     .single();
   if (error) {
     if (error.code === "PGRST116") return null;
     throw new Error(error.message);
   }
-  return data as TrainingModule;
+  return normalizeModuleCategoryRow(data as TrainingModule);
 }
 
 export async function getModuleForStaff(moduleId: string): Promise<TrainingModule | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("training_modules")
-    .select("*")
+    .select(`*, ${TRAINING_MODULE_CATEGORY_EMBED}`)
     .eq("id", moduleId)
     .single();
   if (error) {
     if (error.code === "PGRST116") return null;
     throw new Error(error.message);
   }
-  return data as TrainingModule;
+  return normalizeModuleCategoryRow(data as TrainingModule);
 }

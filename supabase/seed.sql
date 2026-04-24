@@ -16,10 +16,10 @@ DELETE FROM public.training_lessons WHERE module_id IN ('a0000001-0000-4000-8000
 DELETE FROM public.training_modules WHERE id IN ('a0000001-0000-4000-8000-000000000001', 'a0000002-0000-4000-8000-000000000002');
 
 -- Modules
-INSERT INTO public.training_modules (id, title, description, sort_order, is_published, estimated_duration_minutes)
+INSERT INTO public.training_modules (id, title, description, sort_order, is_published, estimated_duration_minutes, category_id)
 VALUES
-  ('a0000001-0000-4000-8000-000000000001', 'Safety Basics', 'Core safety and compliance training.', 0, true, 15),
-  ('a0000002-0000-4000-8000-000000000002', 'Care Standards', 'Quality care and documentation.', 1, true, 20);
+  ('a0000001-0000-4000-8000-000000000001', 'Safety Basics', 'Core safety and compliance training.', 0, true, 15, 'b1111111-1111-1111-1111-111111111101'),
+  ('a0000002-0000-4000-8000-000000000002', 'Care Standards', 'Quality care and documentation.', 1, true, 20, 'b1111111-1111-1111-1111-111111111103');
 
 -- Lessons (text type)
 INSERT INTO public.training_lessons (module_id, title, lesson_type, content_text, sort_order)
